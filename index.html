@@ -471,6 +471,156 @@
     #autodrive.active::before {
       background: #00f5ff;
     }
+    #helpBtn {
+      background: transparent;
+      color: #00f5ff;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 14px;
+      padding: 7px 20px 7px 20px;
+      cursor: pointer;
+      text-shadow: 0 0 6px #00f5ff;
+      box-shadow: none;
+      transition: text-shadow 0.2s ease;
+      text-transform: uppercase;
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: none;
+      outline: none;
+    }
+    #helpBtn::after {
+      content: '?';
+      font-size: 16px;
+      color: #00f5ff;
+      text-shadow: 0 0 8px #00f5ff;
+      margin-left: auto;
+      position: relative;
+      z-index: 1;
+      font-weight: bold;
+    }
+    #helpBtn:hover {
+      text-shadow: 0 0 10px #00f5ff;
+    }
+    #helpModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(5px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      animation: fadeIn 0.3s ease;
+    }
+    #helpModal.show {
+      display: flex;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .help-content {
+      background: linear-gradient(135deg, rgba(10, 10, 30, 0.95) 0%, rgba(15, 5, 25, 0.95) 100%);
+      border: 2px solid #00f5ff;
+      border-radius: 8px;
+      padding: 40px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 0 30px rgba(0, 245, 255, 0.5), inset 0 0 20px rgba(0, 245, 255, 0.1);
+      position: relative;
+      animation: slideIn 0.3s ease;
+    }
+    @keyframes slideIn {
+      from {
+        transform: translateY(-20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    .help-content h2 {
+      color: #00f5ff;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 28px;
+      margin: 0 0 20px 0;
+      text-shadow: 0 0 10px #00f5ff;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    .help-content h3 {
+      color: #ffeb3b;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 18px;
+      margin: 25px 0 10px 0;
+      text-shadow: 0 0 8px rgba(255, 235, 59, 0.5);
+    }
+    .help-content p {
+      color: #00f5ff;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 14px;
+      line-height: 1.8;
+      margin: 10px 0;
+      text-shadow: 0 0 4px rgba(0, 245, 255, 0.3);
+    }
+    .help-content ul {
+      color: #00f5ff;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 14px;
+      line-height: 2;
+      margin: 10px 0;
+      padding-left: 25px;
+      text-shadow: 0 0 4px rgba(0, 245, 255, 0.3);
+    }
+    .help-content li {
+      margin: 8px 0;
+    }
+    .help-content .key {
+      display: inline-block;
+      background: rgba(0, 245, 255, 0.2);
+      border: 1px solid #00f5ff;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+      color: #ffeb3b;
+      text-shadow: 0 0 6px rgba(255, 235, 59, 0.8);
+      margin: 0 2px;
+    }
+    #closeHelp {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: transparent;
+      border: 1px solid #00f5ff;
+      color: #00f5ff;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 20px;
+      width: 35px;
+      height: 35px;
+      cursor: pointer;
+      text-shadow: 0 0 8px #00f5ff;
+      box-shadow: 0 0 10px rgba(0, 245, 255, 0.3);
+      transition: all 0.2s ease;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #closeHelp:hover {
+      background: rgba(0, 245, 255, 0.1);
+      border-color: #ff0040;
+      color: #ff0040;
+      box-shadow: 0 0 15px rgba(255, 0, 64, 0.5);
+      text-shadow: 0 0 10px #ff0040;
+    }
     .game-title {
       position: fixed;
       top: 40px;
@@ -518,8 +668,46 @@
   <div class="text-artifacts-extra"></div>
   <div class="geometric-lines"></div>
   <div class="top-right-controls">
+    <button id="helpBtn" title="How to Play">HELP</button>
     <button id="restart" title="Restart">REBOOT</button>
     <button id="autodrive">Autodrive</button>
+  </div>
+  <div id="helpModal">
+    <div class="help-content">
+      <button id="closeHelp" title="Close">×</button>
+      <h2>HOW TO PLAY</h2>
+      
+      <h3>Objective</h3>
+      <p>Combine numbered tiles to reach the <span class="key">2048</span> tile! Keep playing to achieve higher scores.</p>
+      
+      <h3>Controls</h3>
+      <ul>
+        <li><span class="key">↑</span> <span class="key">↓</span> <span class="key">←</span> <span class="key">→</span> Arrow keys to move tiles</li>
+        <li><span class="key">Swipe</span> on mobile devices</li>
+      </ul>
+      
+      <h3>Gameplay</h3>
+      <ul>
+        <li>When two tiles with the same number touch, they merge into one</li>
+        <li>After each move, a new tile (2 or 4) appears randomly</li>
+        <li>Plan your moves strategically to create larger numbers</li>
+        <li>The game ends when the board is full and no moves are possible</li>
+      </ul>
+      
+      <h3>Tips</h3>
+      <ul>
+        <li>Try to keep your highest number in a corner</li>
+        <li>Build up one direction consistently</li>
+        <li>Don't trap your high-value tiles</li>
+        <li>Use the <span class="key">Autodrive</span> button to watch the AI play</li>
+      </ul>
+      
+      <h3>Buttons</h3>
+      <ul>
+        <li><span class="key">REBOOT</span> - Restart the game</li>
+        <li><span class="key">Autodrive</span> - Enable AI to play automatically</li>
+      </ul>
+    </div>
   </div>
   <div id="ui" style="display: none;"></div>
   <div id="game-container">
@@ -1540,6 +1728,33 @@
       initGame();
     });
     autodriveBtn.addEventListener('click', toggleAutodrive);
+
+    // Help modal functionality
+    const helpBtn = document.getElementById('helpBtn');
+    const helpModal = document.getElementById('helpModal');
+    const closeHelp = document.getElementById('closeHelp');
+
+    helpBtn.addEventListener('click', () => {
+      helpModal.classList.add('show');
+    });
+
+    closeHelp.addEventListener('click', () => {
+      helpModal.classList.remove('show');
+    });
+
+    // Close modal when clicking outside
+    helpModal.addEventListener('click', (e) => {
+      if (e.target === helpModal) {
+        helpModal.classList.remove('show');
+      }
+    });
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && helpModal.classList.contains('show')) {
+        helpModal.classList.remove('show');
+      }
+    });
 
     // Initialize game after fonts are ready
     function startGame() {
