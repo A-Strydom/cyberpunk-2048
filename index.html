@@ -1307,35 +1307,20 @@
         }
       },
       
-      playMove(useMusicalNote = false) {
-        if (useMusicalNote) {
-          // Play next note in the sequence for autodrive
-          const note = this.getNextAutodriveNote();
-          this.playTone(note, 0.12, 'sine', 0.2);
-        } else {
-          // Short, low-pitched swipe sound for manual mode
-          this.playTone(150, 0.08, 'sine', 0.2);
-        }
+      playMove() {
+        // Play next note in the sequence
+        const note = this.getNextAutodriveNote();
+        this.playTone(note, 0.12, 'sine', 0.2);
       },
       
-      playMerge(value, useMusicalNote = false) {
-        if (useMusicalNote) {
-          // Play a chord (note + fifth) for merges in autodrive
-          const note = this.getNextAutodriveNote();
-          const fifth = note * 1.5; // Perfect fifth interval
-          this.playTone(note, 0.18, 'sine', 0.22);
-          setTimeout(() => {
-            this.playTone(fifth, 0.15, 'sine', 0.18);
-          }, 30);
-        } else {
-          // Higher pitch based on merged value, with a satisfying pop
-          const baseFreq = 200 + Math.min(Math.log2(value) * 30, 400);
-          this.playTone(baseFreq, 0.15, 'sine', 0.25);
-          // Add a quick higher tone for the "pop"
-          setTimeout(() => {
-            this.playTone(baseFreq * 1.5, 0.1, 'sine', 0.15);
-          }, 50);
-        }
+      playMerge(value) {
+        // Play a chord (note + fifth) for merges
+        const note = this.getNextAutodriveNote();
+        const fifth = note * 1.5; // Perfect fifth interval
+        this.playTone(note, 0.18, 'sine', 0.22);
+        setTimeout(() => {
+          this.playTone(fifth, 0.15, 'sine', 0.18);
+        }, 30);
       },
       
       playGameOver() {
@@ -1945,7 +1930,7 @@
       mergedPositions.forEach(pos => {
         const mergedValue = newBoard[pos.row][pos.col];
         if (mergedValue > 0) {
-          SoundManager.playMerge(mergedValue, autodriveActive);
+          SoundManager.playMerge(mergedValue);
         }
       });
 
@@ -2153,7 +2138,7 @@
       // Play move sound if board actually changed
       const boardChanged = JSON.stringify(oldBoard) !== JSON.stringify(newBoard);
       if (boardChanged) {
-        SoundManager.playMove(autodriveActive);
+        SoundManager.playMove();
       }
 
       // Start animation
