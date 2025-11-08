@@ -2543,9 +2543,15 @@
       
       if (autodriveActive) {
         SoundManager.playLaunch();
+        SoundManager.resetAutodriveSequence(); // Reset to start of sequence
         autodriveBtn.classList.add('active');
         autodriveBtn.textContent = 'Stop';
-        makeAutodriveMove();
+        // Wait for launch sound to complete (0.6 seconds) before starting autodrive
+        setTimeout(() => {
+          if (autodriveActive) {
+            makeAutodriveMove();
+          }
+        }, 600);
       } else {
         autodriveBtn.classList.remove('active');
         autodriveBtn.textContent = 'Autodrive';
