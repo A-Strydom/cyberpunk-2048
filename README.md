@@ -73,11 +73,9 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ## 🎯 Future Enhancements
 
-- [ ] Sound effects
 - [ ] Different difficulty levels
 - [ ] Theme variations
 - [ ] Leaderboard system
-- [ ] Mobile app version
 
 ---
 
