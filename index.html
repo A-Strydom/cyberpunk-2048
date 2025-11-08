@@ -186,6 +186,16 @@
       gap: 15px;
       z-index: 100;
     }
+    .bottom-left-controls {
+      position: fixed;
+      bottom: 40px;
+      left: 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1px;
+      z-index: 100;
+    }
     #restart {
       background: rgba(10, 10, 30, 0.9);
       color: #00f5ff;
@@ -475,6 +485,43 @@
     #autodrive.active::before {
       background: #00f5ff;
     }
+    #soundBtn {
+      background: transparent;
+      color: #00f5ff;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 14px;
+      padding: 7px 20px 7px 20px;
+      cursor: pointer;
+      text-shadow: 0 0 6px #00f5ff;
+      box-shadow: none;
+      transition: text-shadow 0.2s ease, opacity 0.2s ease;
+      text-transform: uppercase;
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: none;
+      outline: none;
+    }
+    #soundBtn::after {
+      content: '♪';
+      font-size: 16px;
+      color: #00f5ff;
+      text-shadow: 0 0 8px #00f5ff;
+      margin-left: auto;
+      position: relative;
+      z-index: 1;
+    }
+    #soundBtn.muted::after {
+      content: '♫';
+      opacity: 0.5;
+    }
+    #soundBtn.muted {
+      opacity: 0.6;
+    }
+    #soundBtn:hover {
+      text-shadow: 0 0 10px #00f5ff;
+    }
     #helpBtn {
       background: transparent;
       color: #00f5ff;
@@ -705,20 +752,21 @@
         flex: 0 0 auto;
         min-width: 75px;
         white-space: nowrap;
-        order: 1;
       }
 
-      #helpBtn {
+      .bottom-left-controls {
+        bottom: 15px;
+        left: 15px;
+        gap: 1px;
+      }
+
+      #soundBtn, #helpBtn {
         font-size: 11px;
         padding: 8px 12px;
         min-height: 40px;
         touch-action: manipulation;
-        flex: 0 0 auto;
-        white-space: nowrap;
-        order: 2;
         min-width: 75px;
-        margin-top: 4px;
-        align-self: flex-end;
+        white-space: nowrap;
       }
 
       #game-container {
@@ -810,6 +858,12 @@
         max-width: calc(55% - 15px);
       }
 
+      .bottom-left-controls {
+        bottom: 10px;
+        left: 10px;
+        gap: 1px;
+      }
+
       #restart, #autodrive {
         font-size: 10px;
         padding: 6px 10px;
@@ -817,13 +871,11 @@
         min-height: 38px;
       }
 
-      #helpBtn {
+      #soundBtn, #helpBtn {
         font-size: 9px;
         padding: 6px 10px;
         min-width: 65px;
         min-height: 38px;
-        margin-top: 4px;
-        align-self: flex-end;
       }
 
       .score-display strong {
@@ -866,9 +918,12 @@
   <div class="text-artifacts-extra"></div>
   <div class="geometric-lines"></div>
   <div class="top-right-controls">
-    <button id="helpBtn" title="How to Play">HELP</button>
     <button id="restart" title="Restart">REBOOT</button>
     <button id="autodrive">Autodrive</button>
+  </div>
+  <div class="bottom-left-controls">
+    <button id="soundBtn" title="Toggle Sound">SOUND</button>
+    <button id="helpBtn" title="How to Play">HELP</button>
   </div>
   <div id="helpModal">
     <div class="help-content">
@@ -1003,6 +1058,110 @@
     let autodriveActive = false;
     let autodriveTimeout = null;
 
+    // Sound Manager
+    const SoundManager = {
+      audioContext: null,
+      enabled: true,
+      
+      init() {
+        try {
+          this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          // Load sound preference from localStorage
+          const soundPref = localStorage.getItem('soundEnabled');
+          this.enabled = soundPref === null ? true : soundPref === 'true';
+          this.updateButton();
+        } catch (e) {
+          console.warn('Web Audio API not supported:', e);
+          this.enabled = false;
+        }
+      },
+      
+      updateButton() {
+        const soundBtn = document.getElementById('soundBtn');
+        if (soundBtn) {
+          if (this.enabled) {
+            soundBtn.classList.remove('muted');
+          } else {
+            soundBtn.classList.add('muted');
+          }
+        }
+      },
+      
+      toggle() {
+        this.enabled = !this.enabled;
+        localStorage.setItem('soundEnabled', this.enabled.toString());
+        this.updateButton();
+        // Play a test sound when enabling
+        if (this.enabled) {
+          this.playMove();
+        }
+      },
+      
+      playTone(frequency, duration, type = 'sine', volume = 0.3) {
+        if (!this.enabled || !this.audioContext) return;
+        
+        // Resume audio context if suspended (required by browsers)
+        if (this.audioContext.state === 'suspended') {
+          this.audioContext.resume().catch(() => {});
+        }
+        
+        try {
+          const now = this.audioContext.currentTime;
+          const oscillator = this.audioContext.createOscillator();
+          const gainNode = this.audioContext.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(this.audioContext.destination);
+          
+          oscillator.type = type;
+          oscillator.frequency.value = frequency;
+          
+          // Smoother envelope to prevent crackling - use exponential ramp from very small value
+          gainNode.gain.setValueAtTime(0.0001, now);
+          gainNode.gain.exponentialRampToValueAtTime(volume, now + 0.003);
+          gainNode.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+          
+          oscillator.start(now);
+          oscillator.stop(now + duration);
+        } catch (e) {
+          console.warn('Error playing sound:', e);
+        }
+      },
+      
+      playMove() {
+        // Short, low-pitched swipe sound
+        this.playTone(150, 0.08, 'sine', 0.2);
+      },
+      
+      playMerge(value) {
+        // Higher pitch based on merged value, with a satisfying pop
+        const baseFreq = 200 + Math.min(Math.log2(value) * 30, 400);
+        this.playTone(baseFreq, 0.15, 'sine', 0.25);
+        // Add a quick higher tone for the "pop"
+        setTimeout(() => {
+          this.playTone(baseFreq * 1.5, 0.1, 'sine', 0.15);
+        }, 50);
+      },
+      
+      playGameOver() {
+        // Descending tone sequence for game over
+        const frequencies = [300, 250, 200, 150];
+        frequencies.forEach((freq, index) => {
+          setTimeout(() => {
+            this.playTone(freq, 0.2, 'sine', 0.3);
+          }, index * 100);
+        });
+      },
+      
+      playNewTile() {
+        // Subtle pop for new tile
+        this.playTone(250, 0.1, 'sine', 0.15);
+      }
+    };
+    
+    // Initialize sound manager
+    SoundManager.init();
+
     function initGame() {
       // Stop any ongoing animations
       isAnimating = false;
@@ -1036,6 +1195,7 @@
       gameOver = true;
       finalScoreEl.textContent = score;
       gameOverEl.classList.add('show');
+      SoundManager.playGameOver();
       // Stop autodrive when game ends
       if (autodriveActive) {
         autodriveActive = false;
@@ -1139,7 +1299,10 @@
 
     function addTile() {
       const cell = getRandomEmptyCell();
-      if (cell) board[cell.i][cell.j] = Math.random() > 0.9 ? 4 : 2;
+      if (cell) {
+        board[cell.i][cell.j] = Math.random() > 0.9 ? 4 : 2;
+        SoundManager.playNewTile();
+      }
     }
 
     // Helper function to draw rounded rectangle
@@ -1475,6 +1638,14 @@
 
       // Update score with the total increment from all merges
       score += totalScoreIncrement;
+      
+      // Play merge sounds for each merged tile
+      mergedPositions.forEach(pos => {
+        const mergedValue = newBoard[pos.row][pos.col];
+        if (mergedValue > 0) {
+          SoundManager.playMerge(mergedValue);
+        }
+      });
 
       // Rebuild tiles array by matching old positions to new positions
       const newTiles = [];
@@ -1676,6 +1847,12 @@
 
       // Update board
       board = newBoard;
+      
+      // Play move sound if board actually changed
+      const boardChanged = JSON.stringify(oldBoard) !== JSON.stringify(newBoard);
+      if (boardChanged) {
+        SoundManager.playMove();
+      }
 
       // Start animation
       isAnimating = true;
@@ -2122,6 +2299,14 @@
       initGame();
     });
     autodriveBtn.addEventListener('click', toggleAutodrive);
+
+    // Sound button functionality
+    const soundBtn = document.getElementById('soundBtn');
+    if (soundBtn) {
+      soundBtn.addEventListener('click', () => {
+        SoundManager.toggle();
+      });
+    }
 
     // Help modal functionality
     const helpBtn = document.getElementById('helpBtn');
