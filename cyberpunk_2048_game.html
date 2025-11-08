@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cyberpunk 2077 - 2048</title>
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <title>Cyberpunk 2048</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3Cfilter id='cyanGlow' x='-50%25' y='-50%25' width='200%25' height='200%25'%3E%3CfeGaussianBlur stdDeviation='2' result='coloredBlur'/%3E%3CfeMerge%3E%3CfeMergeNode in='coloredBlur'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3Cfilter id='yellowGlow' x='-50%25' y='-50%25' width='200%25' height='200%25'%3E%3CfeGaussianBlur stdDeviation='2.5' result='coloredBlur'/%3E%3CfeMerge%3E%3CfeMergeNode in='coloredBlur'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3Cfilter id='pinkGlow' x='-150%25' y='-150%25' width='400%25' height='400%25'%3E%3CfeGaussianBlur stdDeviation='5' result='coloredBlur'/%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='2.5' result='coloredBlur2'/%3E%3CfeMerge%3E%3CfeMergeNode in='coloredBlur'/%3E%3CfeMergeNode in='coloredBlur2'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3Cfilter id='cyanBorderGlow' x='-50%25' y='-50%25' width='200%25' height='200%25'%3E%3CfeGaussianBlur stdDeviation='3' result='coloredBlur'/%3E%3CfeMerge%3E%3CfeMergeNode in='coloredBlur'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3Cfilter id='pinkNeonGlow' x='-200%25' y='-200%25' width='500%25' height='500%25'%3E%3CfeGaussianBlur stdDeviation='6' result='coloredBlur'/%3E%3CfeColorMatrix in='coloredBlur' type='matrix' values='1 0 0 0 1 0 0 0 0.25 0 0 0 0 0.63 0 0 0 0 1 0'/%3E%3CfeMerge%3E%3CfeMergeNode in='coloredBlur'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23pinkNeonGlow)'%3E%3Crect width='100' height='100' fill='%230a030a'/%3E%3Cg%3E%3Crect x='5' y='5' width='28' height='28' fill='rgba(15,10,25,0.4)' rx='2'/%3E%3Crect x='36' y='5' width='28' height='28' fill='%2300f5ff' filter='url(%23cyanGlow)' rx='2' opacity='0.9'/%3E%3Crect x='67' y='5' width='28' height='28' fill='%23ff00ff' filter='url(%23pinkGlow)' rx='2' opacity='1'/%3E%3Crect x='5' y='36' width='28' height='28' fill='%2300d0e0' filter='url(%23cyanGlow)' rx='2' opacity='0.85'/%3E%3Crect x='36' y='36' width='28' height='28' fill='rgba(15,10,25,0.4)' rx='2'/%3E%3Crect x='67' y='36' width='28' height='28' fill='rgba(15,10,25,0.4)' rx='2'/%3E%3Crect x='5' y='67' width='28' height='28' fill='%23ffeb3b' filter='url(%23yellowGlow)' rx='2' opacity='0.95'/%3E%3Crect x='36' y='67' width='28' height='28' fill='%2300d0e0' filter='url(%23cyanGlow)' rx='2' opacity='0.85'/%3E%3Crect x='67' y='67' width='28' height='28' fill='rgba(15,10,25,0.4)' rx='2'/%3E%3C/g%3E%3Crect x='1' y='1' width='98' height='98' fill='none' stroke='%2300f5ff' stroke-width='1.5' opacity='0.5' rx='3'/%3E%3Crect x='2' y='2' width='96' height='96' fill='none' stroke='%2300f5ff' stroke-width='2' filter='url(%23cyanBorderGlow)' rx='3'/%3E%3C/g%3E%3Crect x='-2' y='-2' width='104' height='104' fill='none' stroke='%23ff0040' stroke-width='2' opacity='0.6' rx='6'/%3E%3Crect x='-3' y='-3' width='106' height='106' fill='none' stroke='%23ff0040' stroke-width='1' opacity='0.4' rx='7'/%3E%3C/svg%3E" type="image/svg+xml">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Sixtyfour&display=swap" rel="stylesheet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <style>
@@ -168,47 +169,168 @@
         radial-gradient(circle at 70% 70%, rgba(255, 0, 64, 0.08) 0%, transparent 50%);
     }
     #ui {
+      display: none;
+    }
+    .top-right-controls {
+      position: fixed;
+      top: 40px;
+      right: 80px;
       display: flex;
-      justify-content: center;
       align-items: center;
-      gap: 20px;
-      width: 500px;
-      margin-bottom: 15px;
-      position: relative;
-      z-index: 10;
-    }
-    .score-box {
-      background: rgba(10, 10, 30, 0.85);
-      border: 1px solid #00f5ff;
-      border-radius: 6px;
-      padding: 6px 14px;
-      box-shadow: 0 0 8px #00f5ff;
-      text-align: center;
-    }
-    .score-box span {
-      display: block;
-      font-size: 13px;
-      color: #f0f;
-      text-shadow: none;
-    }
-    .score-box strong {
-      font-size: 18px;
-      color: #00f5ff;
-      text-shadow: 0 0 6px #00f5ff;
+      gap: 15px;
+      z-index: 100;
     }
     #restart {
-      background: transparent;
-      border: none;
-      cursor: pointer;
+      background: rgba(10, 10, 30, 0.9);
       color: #00f5ff;
-      font-size: 22px;
-      transition: all 0.2s ease-in-out;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 14px;
+      padding: 7px 20px 7px 20px;
+      cursor: pointer;
       text-shadow: 0 0 6px #00f5ff;
+      box-shadow: 0 0 8px rgba(255, 107, 53, 0.5);
+      transition: background 0.2s ease, box-shadow 0.2s ease, text-shadow 0.2s ease;
+      text-transform: uppercase;
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid #ff6b35;
+      outline: none;
+    }
+    #restart::before {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: #ff6b35;
+      pointer-events: none;
+      z-index: 1;
+    }
+    #restart::after {
+      content: '⚡';
+      font-size: 16px;
+      color: #00f5ff;
+      text-shadow: 0 0 8px #00f5ff;
+      margin-left: auto;
+      position: relative;
+      z-index: 1;
     }
     #restart:hover {
-      color: #f0f;
-      transform: scale(1.2);
-      text-shadow: 0 0 10px #f0f;
+      background: rgba(10, 10, 30, 0.95);
+      box-shadow: 0 0 15px rgba(255, 107, 53, 0.8);
+      text-shadow: 0 0 10px #00f5ff;
+    }
+    #restart.clicking {
+      animation: buttonGlitch 0.4s ease;
+    }
+    @keyframes buttonGlitch {
+      0%, 100% { transform: translateX(0); }
+      10% { transform: translateX(-2px) translateY(1px); }
+      20% { transform: translateX(2px) translateY(-1px); }
+      30% { transform: translateX(-1px) translateY(2px); }
+      40% { transform: translateX(1px) translateY(-2px); }
+      50% { transform: translateX(-2px); }
+      60% { transform: translateX(2px); }
+      70% { transform: translateX(-1px); }
+      80% { transform: translateX(1px); }
+    }
+    canvas.glitching {
+      animation: boardGlitch 0.5s ease;
+    }
+    @keyframes boardGlitch {
+      0%, 100% { 
+        transform: translateX(0) translateY(0);
+        filter: hue-rotate(0deg);
+      }
+      5% { 
+        transform: translateX(-3px) translateY(2px);
+        filter: hue-rotate(90deg);
+      }
+      10% { 
+        transform: translateX(3px) translateY(-2px);
+        filter: hue-rotate(-90deg);
+      }
+      15% { 
+        transform: translateX(-2px) translateY(3px);
+        filter: hue-rotate(180deg);
+      }
+      20% { 
+        transform: translateX(2px) translateY(-3px);
+        filter: hue-rotate(-180deg);
+      }
+      25% { 
+        transform: translateX(-4px) translateY(1px);
+        filter: hue-rotate(45deg);
+      }
+      30% { 
+        transform: translateX(4px) translateY(-1px);
+        filter: hue-rotate(-45deg);
+      }
+      35% { 
+        transform: translateX(-1px) translateY(4px);
+        filter: hue-rotate(135deg);
+      }
+      40% { 
+        transform: translateX(1px) translateY(-4px);
+        filter: hue-rotate(-135deg);
+      }
+      45% { 
+        transform: translateX(-3px);
+        filter: hue-rotate(90deg);
+      }
+      50% { 
+        transform: translateX(3px);
+        filter: hue-rotate(-90deg);
+      }
+      55% { 
+        transform: translateX(-2px);
+        filter: hue-rotate(0deg);
+      }
+      60% { 
+        transform: translateX(2px);
+        filter: hue-rotate(0deg);
+      }
+      65%, 100% { 
+        transform: translateX(0) translateY(0);
+        filter: hue-rotate(0deg);
+      }
+    }
+    .score-display {
+      position: absolute;
+      top: -50px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      text-align: center;
+      pointer-events: none;
+    }
+    .score-display strong {
+      font-size: 32px;
+      color: #00f5ff;
+      text-shadow: 0 0 10px #00f5ff, 0 0 20px rgba(0, 245, 255, 0.5);
+      font-family: 'Share Tech Mono', monospace;
+    }
+    .high-score-system {
+      position: fixed;
+      bottom: 40px;
+      right: 80px;
+      z-index: 100;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 16px;
+      color: rgba(150, 150, 150, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .high-score-system::before {
+      content: '[SYS] ';
+      color: rgba(0, 245, 255, 0.5);
+    }
+    .high-score-system strong {
+      color: rgba(0, 245, 255, 0.7);
+      font-weight: normal;
     }
     canvas {
       background: rgba(10, 10, 30, 0.3);
@@ -219,6 +341,10 @@
       display: block;
       position: relative;
       z-index: 10;
+    }
+    #game-container {
+      position: relative;
+      display: inline-block;
     }
     #gameOver {
       position: absolute;
@@ -290,47 +416,118 @@
       text-shadow: 0 0 15px #f0f;
     }
     #autodrive {
-      background: transparent;
-      border: 1px solid #f0f;
-      color: #f0f;
+      background: rgba(10, 10, 30, 0.9);
+      color: #00f5ff;
       font-family: 'Share Tech Mono', monospace;
-      font-size: 12px;
-      padding: 5px 10px;
+      font-size: 14px;
+      padding: 7px 20px 7px 20px;
       cursor: pointer;
-      text-shadow: 0 0 6px #f0f;
-      box-shadow: 0 0 8px #f0f;
-      transition: all 0.2s ease;
-      border-radius: 4px;
-      margin-left: 10px;
+      text-shadow: 0 0 6px #00f5ff;
+      box-shadow: 0 0 8px rgba(255, 107, 53, 0.5);
+      transition: background 0.2s ease, box-shadow 0.2s ease, text-shadow 0.2s ease, border-color 0.2s ease;
+      text-transform: uppercase;
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid #ff6b35;
+      outline: none;
+    }
+    #autodrive::before {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: #ff6b35;
+      pointer-events: none;
+      z-index: 1;
+    }
+    #autodrive::after {
+      content: '▶';
+      font-size: 12px;
+      color: #00f5ff;
+      text-shadow: 0 0 8px #00f5ff;
+      margin-left: auto;
+      position: relative;
+      z-index: 1;
     }
     #autodrive:hover {
-      background: rgba(240, 0, 255, 0.1);
-      color: #00f5ff;
-      border-color: #00f5ff;
-      box-shadow: 0 0 15px #00f5ff;
+      background: rgba(10, 10, 30, 0.95);
+      box-shadow: 0 0 15px rgba(255, 107, 53, 0.8);
       text-shadow: 0 0 10px #00f5ff;
     }
     #autodrive.active {
-      background: rgba(0, 245, 255, 0.2);
+      background: rgba(0, 245, 255, 0.15);
       border-color: #00f5ff;
       color: #00f5ff;
-      box-shadow: 0 0 15px #00f5ff;
+      box-shadow: 0 0 15px rgba(0, 245, 255, 0.6);
       text-shadow: 0 0 10px #00f5ff;
+    }
+    #autodrive.active::before {
+      background: #00f5ff;
+    }
+    .game-title {
+      position: fixed;
+      top: 40px;
+      left: 80px;
+      z-index: 100;
+      pointer-events: none;
+    }
+    .game-title-main {
+      font-size: 25px;
+      font-weight: normal;
+      color: #ffeb3b;
+      text-shadow: 
+        2px 2px 0 #00f5ff,
+        0 0 4px rgba(0, 245, 255, 0.4),
+        0 0 8px rgba(255, 235, 59, 0.8);
+      letter-spacing: 2px;
+      font-family: 'Sixtyfour', monospace;
+      text-transform: uppercase;
+      line-height: 1;
+      margin-bottom: 5px;
+      filter: drop-shadow(0 0 6px rgba(255, 235, 59, 0.5));
+    }
+    .game-title-sub {
+      font-size: 20px;
+      font-weight: bold;
+      color: #ff6b35;
+      text-shadow: 
+        0 0 8px #ff6b35,
+        0 0 15px rgba(255, 107, 53, 0.5);
+      letter-spacing: 4px;
+      font-family: 'Share Tech Mono', monospace;
+      text-transform: uppercase;
+      line-height: 1;
+      margin-left: 2px;
     }
   </style>
 </head>
 <body>
+  <div class="game-title">
+    <div class="game-title-main">Cyberpunk</div>
+    <div class="game-title-sub">2048</div>
+  </div>
   <div class="code-stream"></div>
   <div class="text-artifacts"></div>
   <div class="text-artifacts-extra"></div>
   <div class="geometric-lines"></div>
-  <div id="ui">
-    <div class="score-box"><span>Score</span><strong id="score">0</strong></div>
-    <button id="restart" title="Restart">&#x21bb;</button>
-    <div class="score-box"><span>High Score</span><strong id="highscore">0</strong></div>
+  <div class="top-right-controls">
+    <button id="restart" title="Restart">REBOOT</button>
     <button id="autodrive">Autodrive</button>
   </div>
-  <canvas id="game"></canvas>
+  <div id="ui" style="display: none;"></div>
+  <div id="game-container">
+    <canvas id="game"></canvas>
+    <div class="score-display">
+      <strong id="score">0</strong>
+    </div>
+  </div>
+  <div class="high-score-system">
+    HIGH SCORE: <strong id="highscore">0</strong>
+  </div>
   <div id="gameOver">
     <div class="game-over-content">
       <div class="flatlined-text">FLATLINED</div>
@@ -680,10 +877,11 @@
 
       const newRow = row.filter(v => v);
       const merged = [];
+      let scoreIncrement = 0;
       for (let i = 0; i < newRow.length - 1; i++) {
         if (newRow[i] === newRow[i + 1]) {
           newRow[i] *= 2;
-          score += newRow[i];
+          scoreIncrement += newRow[i];
           merged.push({
             value: newRow[i],
             position: direction === 'left' ? i : direction === 'right' ? size - 1 - i : i,
@@ -694,7 +892,7 @@
       }
       const finalRow = newRow.filter(v => v).concat(Array(size - newRow.filter(v => v).length).fill(0));
       
-      return { row: finalRow, merged };
+      return { row: finalRow, merged, scoreIncrement };
     }
 
     function rotateBoardClockwise() {
@@ -728,17 +926,20 @@
 
       const newBoard = Array.from({ length: size }, () => Array(size).fill(0));
       const mergedPositions = [];
+      let totalScoreIncrement = 0;
 
       if (direction === 'left') {
         for (let i = 0; i < size; i++) {
           const result = move(board[i], i, 'left');
           newBoard[i] = result.row;
+          totalScoreIncrement += result.scoreIncrement || 0;
           result.merged.forEach(m => mergedPositions.push({ row: m.row, col: m.position }));
         }
       } else if (direction === 'right') {
         for (let i = 0; i < size; i++) {
           const result = move([...board[i]].reverse(), i, 'right');
           newBoard[i] = result.row.reverse();
+          totalScoreIncrement += result.scoreIncrement || 0;
           result.merged.forEach(m => mergedPositions.push({ row: m.row, col: size - 1 - m.position }));
         }
       } else if (direction === 'up') {
@@ -746,6 +947,7 @@
         for (let i = 0; i < size; i++) {
           const result = move(rotated[i], i, 'left');
           rotated[i] = result.row;
+          totalScoreIncrement += result.scoreIncrement || 0;
           result.merged.forEach(m => {
             // After rotating back clockwise: newBoard[j][size - 1 - i] = rotated[i][j]
             // So rotated[i][m.position] becomes newBoard[m.position][size - 1 - i]
@@ -764,6 +966,7 @@
         for (let i = 0; i < size; i++) {
           const result = move(rotated[i], i, 'left');
           rotated[i] = result.row;
+          totalScoreIncrement += result.scoreIncrement || 0;
           result.merged.forEach(m => {
             // After rotating back counter-clockwise: newBoard[size - 1 - j][i] = rotated[i][j]
             // So rotated[i][m.position] becomes newBoard[size - 1 - m.position][i]
@@ -778,6 +981,9 @@
           }
         }
       }
+
+      // Update score with the total increment from all merges
+      score += totalScoreIncrement;
 
       // Rebuild tiles array by matching old positions to new positions
       const newTiles = [];
@@ -1295,6 +1501,18 @@
     }
 
     restartBtn.addEventListener('click', () => {
+      // Trigger button animation
+      restartBtn.classList.add('clicking');
+      setTimeout(() => {
+        restartBtn.classList.remove('clicking');
+      }, 400);
+      
+      // Trigger board glitch effect
+      canvas.classList.add('glitching');
+      setTimeout(() => {
+        canvas.classList.remove('glitching');
+      }, 500);
+      
       autodriveActive = false;
       if (autodriveTimeout) {
         clearTimeout(autodriveTimeout);
@@ -1302,7 +1520,11 @@
       }
       autodriveBtn.classList.remove('active');
       autodriveBtn.textContent = 'Autodrive';
-      initGame();
+      
+      // Delay game restart slightly to let animations play
+      setTimeout(() => {
+        initGame();
+      }, 300);
     });
     restartGameBtn.addEventListener('click', () => {
       autodriveActive = false;
