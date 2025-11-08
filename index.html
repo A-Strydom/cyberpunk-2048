@@ -1224,6 +1224,11 @@
     const SoundManager = {
       audioContext: null,
       enabled: true,
+      autodriveNoteIndex: 0,
+      
+      // Musical scale for autodrive mode (pentatonic scale in C major)
+      // C, D, E, G, A, C (octave)
+      autodriveScale: [261.63, 293.66, 329.63, 392.00, 440.00, 523.25],
       
       init() {
         try {
@@ -1236,6 +1241,16 @@
           console.warn('Web Audio API not supported:', e);
           this.enabled = false;
         }
+      },
+      
+      getNextAutodriveNote() {
+        const note = this.autodriveScale[this.autodriveNoteIndex];
+        this.autodriveNoteIndex = (this.autodriveNoteIndex + 1) % this.autodriveScale.length;
+        return note;
+      },
+      
+      resetAutodriveSequence() {
+        this.autodriveNoteIndex = 0;
       },
       
       updateButton() {
@@ -1292,19 +1307,35 @@
         }
       },
       
-      playMove() {
-        // Short, low-pitched swipe sound
-        this.playTone(150, 0.08, 'sine', 0.2);
+      playMove(useMusicalNote = false) {
+        if (useMusicalNote) {
+          // Play next note in the sequence for autodrive
+          const note = this.getNextAutodriveNote();
+          this.playTone(note, 0.12, 'sine', 0.2);
+        } else {
+          // Short, low-pitched swipe sound for manual mode
+          this.playTone(150, 0.08, 'sine', 0.2);
+        }
       },
       
-      playMerge(value) {
-        // Higher pitch based on merged value, with a satisfying pop
-        const baseFreq = 200 + Math.min(Math.log2(value) * 30, 400);
-        this.playTone(baseFreq, 0.15, 'sine', 0.25);
-        // Add a quick higher tone for the "pop"
-        setTimeout(() => {
-          this.playTone(baseFreq * 1.5, 0.1, 'sine', 0.15);
-        }, 50);
+      playMerge(value, useMusicalNote = false) {
+        if (useMusicalNote) {
+          // Play a chord (note + fifth) for merges in autodrive
+          const note = this.getNextAutodriveNote();
+          const fifth = note * 1.5; // Perfect fifth interval
+          this.playTone(note, 0.18, 'sine', 0.22);
+          setTimeout(() => {
+            this.playTone(fifth, 0.15, 'sine', 0.18);
+          }, 30);
+        } else {
+          // Higher pitch based on merged value, with a satisfying pop
+          const baseFreq = 200 + Math.min(Math.log2(value) * 30, 400);
+          this.playTone(baseFreq, 0.15, 'sine', 0.25);
+          // Add a quick higher tone for the "pop"
+          setTimeout(() => {
+            this.playTone(baseFreq * 1.5, 0.1, 'sine', 0.15);
+          }, 50);
+        }
       },
       
       playGameOver() {
@@ -1914,7 +1945,7 @@
       mergedPositions.forEach(pos => {
         const mergedValue = newBoard[pos.row][pos.col];
         if (mergedValue > 0) {
-          SoundManager.playMerge(mergedValue);
+          SoundManager.playMerge(mergedValue, autodriveActive);
         }
       });
 
@@ -2122,7 +2153,7 @@
       // Play move sound if board actually changed
       const boardChanged = JSON.stringify(oldBoard) !== JSON.stringify(newBoard);
       if (boardChanged) {
-        SoundManager.playMove();
+        SoundManager.playMove(autodriveActive);
       }
 
       // Start animation
