@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="description" content="A cyberpunk-themed 2048 puzzle game with neon visuals, smooth animations, and AI autodrive mode. Play now!">
   <meta name="keywords" content="2048, puzzle game, cyberpunk, neon, game, html5">
   <meta name="author" content="">
@@ -656,6 +659,200 @@
       line-height: 1;
       margin-left: 2px;
     }
+
+    /* Mobile Responsive Styles */
+    @media (max-width: 768px) {
+      body {
+        overflow-y: auto;
+        padding: 10px;
+        min-height: 100vh;
+        height: auto;
+      }
+
+      .game-title {
+        top: 15px;
+        left: 15px;
+        position: fixed;
+        max-width: calc(50% - 20px);
+      }
+
+      .game-title-main {
+        font-size: 18px;
+      }
+
+      .game-title-sub {
+        font-size: 14px;
+        letter-spacing: 2px;
+      }
+
+      .top-right-controls {
+        top: 15px;
+        right: 15px;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        flex-direction: row;
+        align-items: flex-start;
+        max-width: calc(50% - 20px);
+      }
+
+      #restart, #autodrive {
+        font-size: 11px;
+        padding: 8px 12px;
+        min-height: 40px;
+        touch-action: manipulation;
+        flex: 0 0 auto;
+        min-width: 75px;
+        white-space: nowrap;
+        order: 1;
+      }
+
+      #helpBtn {
+        font-size: 11px;
+        padding: 8px 12px;
+        min-height: 40px;
+        touch-action: manipulation;
+        flex: 0 0 auto;
+        white-space: nowrap;
+        order: 2;
+        min-width: 75px;
+        margin-top: 4px;
+        align-self: flex-end;
+      }
+
+      #game-container {
+        margin-top: 80px;
+        margin-bottom: 20px;
+      }
+
+      canvas {
+        width: 100% !important;
+        max-width: 100vw;
+        height: auto !important;
+        max-height: calc(100vh - 200px);
+        aspect-ratio: 1;
+      }
+
+      .score-display {
+        top: -40px;
+      }
+
+      .score-display strong {
+        font-size: 24px;
+      }
+
+      .high-score-system {
+        bottom: 15px;
+        right: 15px;
+        font-size: 12px;
+        position: fixed;
+      }
+
+      .code-stream, .text-artifacts, .text-artifacts-extra {
+        display: none;
+      }
+
+      .help-content {
+        padding: 25px;
+        max-width: 95%;
+        max-height: 90vh;
+      }
+
+      .help-content h2 {
+        font-size: 22px;
+      }
+
+      .help-content h3 {
+        font-size: 16px;
+      }
+
+      .help-content p, .help-content li {
+        font-size: 12px;
+      }
+
+      .game-over-content {
+        padding: 20px;
+      }
+
+      .flatlined-text {
+        font-size: 48px;
+      }
+
+      .game-over-subtitle {
+        font-size: 18px;
+      }
+
+      #restartGame {
+        font-size: 16px;
+        padding: 12px 30px;
+        min-height: 44px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .game-title-main {
+        font-size: 16px;
+      }
+
+      .game-title-sub {
+        font-size: 12px;
+      }
+
+      .game-title {
+        max-width: calc(45% - 15px);
+      }
+
+      .top-right-controls {
+        gap: 6px;
+        top: 10px;
+        right: 10px;
+        max-width: calc(55% - 15px);
+      }
+
+      #restart, #autodrive {
+        font-size: 10px;
+        padding: 6px 10px;
+        min-width: 65px;
+        min-height: 38px;
+      }
+
+      #helpBtn {
+        font-size: 9px;
+        padding: 6px 10px;
+        min-width: 65px;
+        min-height: 38px;
+        margin-top: 4px;
+        align-self: flex-end;
+      }
+
+      .score-display strong {
+        font-size: 20px;
+      }
+
+      .high-score-system {
+        font-size: 11px;
+      }
+    }
+
+    /* Prevent text selection on buttons for better mobile UX */
+    button {
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* Prevent pull-to-refresh on mobile */
+    body {
+      overscroll-behavior-y: contain;
+    }
+
+    canvas {
+      touch-action: none;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
   </style>
 </head>
 <body>
@@ -731,7 +928,13 @@
   </div>
   <script>
     const canvas = document.getElementById('game');
-    const ctx = canvas.getContext('2d');
+    if (!canvas) {
+      console.error('Canvas element not found!');
+    }
+    const ctx = canvas ? canvas.getContext('2d') : null;
+    if (!ctx) {
+      console.error('Could not get 2D context from canvas!');
+    }
     const scoreEl = document.getElementById('score');
     const highscoreEl = document.getElementById('highscore');
     const restartBtn = document.getElementById('restart');
@@ -740,19 +943,56 @@
     const restartGameBtn = document.getElementById('restartGame');
     const autodriveBtn = document.getElementById('autodrive');
 
-    const logicalSize = 500;
-    const scale = window.devicePixelRatio || 1;
-    canvas.width = logicalSize * scale;
-    canvas.height = logicalSize * scale;
-    canvas.style.width = logicalSize + 'px';
-    canvas.style.height = logicalSize + 'px';
-    ctx.scale(scale, scale);
-
     const size = 4;
     const gap = 10;
-    const totalGaps = (size + 1) * gap;
-    const tileSize = (logicalSize - totalGaps) / size;
     const cornerRadius = 8; // Rounded corner radius for tiles
+
+    // Responsive canvas sizing
+    function getCanvasSize() {
+      const maxSize = 500;
+      const isMobile = window.innerWidth <= 768;
+      if (isMobile) {
+        const viewportWidth = window.innerWidth - 40;
+        const viewportHeight = window.innerHeight - 200;
+        return Math.min(viewportWidth, viewportHeight, maxSize);
+      }
+      return maxSize;
+    }
+
+    let logicalSize = getCanvasSize();
+    const scale = window.devicePixelRatio || 1;
+    let totalGaps = (size + 1) * gap;
+    let tileSize = (logicalSize - totalGaps) / size;
+    
+    function resizeCanvas() {
+      logicalSize = getCanvasSize();
+      if (logicalSize < 200) logicalSize = 200;
+      
+      canvas.width = logicalSize * scale;
+      canvas.height = logicalSize * scale;
+      canvas.style.width = logicalSize + 'px';
+      canvas.style.height = logicalSize + 'px';
+      ctx.setTransform(scale, 0, 0, scale, 0, 0);
+      
+      totalGaps = (size + 1) * gap;
+      tileSize = (logicalSize - totalGaps) / size;
+      if (tileSize <= 0) tileSize = 50;
+      
+      // Don't auto-redraw here - let initGame handle it
+    }
+
+    // Debounce resize to prevent performance issues
+    let resizeTimeout = null;
+    function handleResize() {
+      if (resizeTimeout) clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(resizeCanvas, 150);
+    }
+
+    resizeCanvas();
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', () => {
+      setTimeout(resizeCanvas, 100);
+    });
 
     let board, score, highscore;
     let tiles = []; // Array of tile objects with position and animation data
@@ -763,6 +1003,10 @@
     let autodriveTimeout = null;
 
     function initGame() {
+      // Stop any ongoing animations
+      isAnimating = false;
+      
+      // Initialize board first
       board = Array.from({ length: size }, () => Array(size).fill(0));
       tiles = [];
       mergeAnimations = [];
@@ -771,10 +1015,20 @@
       highscore = parseInt(localStorage.getItem('highscore')) || 0;
       updateScores();
       hideGameOver();
+      
+      // Ensure canvas is properly sized first
+      resizeCanvas();
+      
+      // Add initial tiles
       addTile();
       addTile();
       syncTilesFromBoard();
+      
+      // Draw the board
       drawBoard();
+      
+      // Debug: Log to verify tiles were added
+      console.log('Game initialized. Tiles:', tiles.length, 'Board:', board);
     }
 
     function showGameOver() {
@@ -845,9 +1099,31 @@
       }
     }
 
+    // Debounce localStorage writes to prevent blocking
+    let localStorageTimeout = null;
+    
     function updateScores() {
-      scoreEl.textContent = score;
-      highscoreEl.textContent = highscore;
+      // Update DOM immediately (non-blocking)
+      if (scoreEl) scoreEl.textContent = score;
+      if (highscoreEl) highscoreEl.textContent = highscore;
+      
+      // Debounce localStorage write (only save if score increased)
+      if (score > highscore) {
+        highscore = score;
+        // Clear any pending write
+        if (localStorageTimeout) {
+          clearTimeout(localStorageTimeout);
+        }
+        // Write to localStorage asynchronously to avoid blocking
+        localStorageTimeout = setTimeout(() => {
+          try {
+            localStorage.setItem('highscore', highscore);
+          } catch (e) {
+            // Ignore localStorage errors (quota exceeded, etc.)
+          }
+          localStorageTimeout = null;
+        }, 100);
+      }
     }
 
     function getRandomEmptyCell() {
@@ -882,6 +1158,16 @@
     }
 
     function drawBoard() {
+      // Safety check - ensure canvas is ready
+      if (!canvas || !ctx) {
+        console.error('Canvas not ready:', { canvas: !!canvas, ctx: !!ctx });
+        return;
+      }
+      if (tileSize <= 0 || logicalSize <= 0) {
+        console.error('Invalid dimensions:', { tileSize, logicalSize });
+        return;
+      }
+      
       ctx.clearRect(0, 0, logicalSize, logicalSize);
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -905,23 +1191,19 @@
 
         let x, y, scale = 1;
 
+        // Handle tile movement animation
         if (isAnimating && (tile.prevRow !== tile.row || tile.prevCol !== tile.col)) {
           const progress = tile.animationProgress || 0;
           const easedProgress = easeOutCubic(progress);
           x = startX + (endX - startX) * easedProgress;
           y = startY + (endY - startY) * easedProgress;
-          // Pop-in effect for new tiles
-          if (tile.isNew) {
-            scale = Math.min(1, progress * 1.2);
-          }
         } else {
           x = endX;
           y = endY;
-          if (tile.isNew) {
-            scale = 1;
-            tile.isNew = false;
-          }
         }
+
+        // New tiles appear immediately (no animation delay)
+        // No scale animation needed - they appear at full size
 
         // Merge animation scale effect
         if (tile.mergeScale) {
@@ -939,51 +1221,50 @@
         fillRoundedRect(x + offset, y + offset, scaledSize, scaledSize, scaledRadius);
         ctx.shadowBlur = 0;
 
-        ctx.font = 'bold 36px "Share Tech Mono"';
+        // Responsive font size
+        const fontSize = Math.max(16, Math.min(36, tileSize * 0.4));
+        ctx.font = `bold ${fontSize}px "Share Tech Mono"`;
         ctx.fillStyle = '#00f5ff';
         ctx.strokeStyle = '#000';
-        ctx.lineWidth = 2;
+        ctx.lineWidth = Math.max(1, fontSize / 18);
         ctx.strokeText(tile.value, x + tileSize / 2, y + tileSize / 2);
         ctx.fillText(tile.value, x + tileSize / 2, y + tileSize / 2);
       });
 
-      // Draw merge particle effects
-      mergeAnimations.forEach((merge, index) => {
-        const x = merge.col * (tileSize + gap) + gap + tileSize / 2;
-        const y = merge.row * (tileSize + gap) + gap + tileSize / 2;
-        const progress = merge.progress;
-        const radius = 15 + progress * 20;
-        const alpha = 1 - progress;
+      // Draw merge particle effects (only when animating - performance optimization)
+      if (isAnimating && mergeAnimations.length > 0) {
+        mergeAnimations.forEach((merge) => {
+          const x = merge.col * (tileSize + gap) + gap + tileSize / 2;
+          const y = merge.row * (tileSize + gap) + gap + tileSize / 2;
+          const progress = merge.progress;
+          const radius = 15 + progress * 20;
+          const alpha = 1 - progress;
 
-        // Outer glow ring
-        const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
-        gradient.addColorStop(0, `rgba(0, 245, 255, ${alpha * 0.8})`);
-        gradient.addColorStop(0.5, `rgba(240, 0, 255, ${alpha * 0.4})`);
-        gradient.addColorStop(1, `rgba(0, 245, 255, 0)`);
-        
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(x, y, radius, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Particle sparks
-        for (let i = 0; i < 8; i++) {
-          const angle = (Math.PI * 2 * i) / 8;
-          const distance = progress * 30;
-          const px = x + Math.cos(angle) * distance;
-          const py = y + Math.sin(angle) * distance;
+          // Outer glow ring
+          const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+          gradient.addColorStop(0, `rgba(0, 245, 255, ${alpha * 0.8})`);
+          gradient.addColorStop(0.5, `rgba(240, 0, 255, ${alpha * 0.4})`);
+          gradient.addColorStop(1, `rgba(0, 245, 255, 0)`);
           
-          ctx.fillStyle = `rgba(0, 245, 255, ${alpha})`;
+          ctx.fillStyle = gradient;
           ctx.beginPath();
-          ctx.arc(px, py, 3, 0, Math.PI * 2);
+          ctx.arc(x, y, radius, 0, Math.PI * 2);
           ctx.fill();
-        }
 
-        merge.progress += 0.05;
-        if (merge.progress >= 1) {
-          mergeAnimations.splice(index, 1);
-        }
-      });
+          // Particle sparks
+          for (let i = 0; i < 8; i++) {
+            const angle = (Math.PI * 2 * i) / 8;
+            const distance = progress * 30;
+            const px = x + Math.cos(angle) * distance;
+            const py = y + Math.sin(angle) * distance;
+            
+            ctx.fillStyle = `rgba(0, 245, 255, ${alpha})`;
+            ctx.beginPath();
+            ctx.arc(px, py, 3, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        });
+      }
     }
 
     // Easing function for smooth animation
@@ -996,9 +1277,13 @@
 
       let allComplete = true;
 
+      // Use consistent animation speed (0.15 per frame = ~6-7 frames to complete)
+      const animationSpeed = 0.15;
+      
       tiles.forEach(tile => {
+        // Handle tile movement animation
         if (tile.prevRow !== tile.row || tile.prevCol !== tile.col) {
-          tile.animationProgress = (tile.animationProgress || 0) + 0.08;
+          tile.animationProgress = (tile.animationProgress || 0) + animationSpeed;
           if (tile.animationProgress < 1) {
             allComplete = false;
           } else {
@@ -1008,13 +1293,20 @@
           }
         }
 
-        // Handle merge scale animation
+        // Handle new tile - show immediately, no animation delay
+        if (tile.isNew && tile.prevRow === tile.row && tile.prevCol === tile.col) {
+          // Mark as complete immediately so it shows right away
+          tile.isNew = false;
+          tile.newTileProgress = 1;
+        }
+
+        // Handle merge scale animation (same speed as movement)
         if (tile.mergedFrom) {
           if (!tile.mergeScale) {
             tile.mergeScale = 1;
             tile.mergeProgress = 0;
           }
-          tile.mergeProgress = (tile.mergeProgress || 0) + 0.12;
+          tile.mergeProgress = (tile.mergeProgress || 0) + animationSpeed;
           
           // Pulse effect: scale up then down
           if (tile.mergeProgress < 0.5) {
@@ -1033,10 +1325,15 @@
         }
       });
 
-      // Continue merge particle animations
-      if (mergeAnimations.length > 0) {
-        allComplete = false;
-      }
+      // Update merge particle animations (same speed for consistency)
+      mergeAnimations.forEach((merge, index) => {
+        merge.progress = (merge.progress || 0) + animationSpeed;
+        if (merge.progress >= 1) {
+          mergeAnimations.splice(index, 1);
+        } else {
+          allComplete = false;
+        }
+      });
 
       drawBoard();
 
@@ -1047,7 +1344,9 @@
           tile.animationProgress = null;
           tile.mergeScale = null;
           tile.mergeProgress = null;
+          tile.newTileProgress = null;
         });
+        mergeAnimations = []; // Clear merge animations when done
       } else {
         requestAnimationFrame(animateTiles);
       }
@@ -1454,10 +1753,6 @@
             });
             drawBoard();
             updateScores();
-            if (score > highscore) {
-              highscore = score;
-              localStorage.setItem('highscore', highscore);
-            }
             
             // Check for game over after move completes
             if (!hasAvailableMoves()) {
@@ -1470,6 +1765,108 @@
         requestAnimationFrame(checkAndAddTile);
       }
     });
+
+    // Touch/Swipe handlers for mobile
+    const gameContainer = document.getElementById('game-container');
+    let touchStartX = null;
+    let touchStartY = null;
+    const minSwipeDistance = 30;
+
+    function isInteractiveElement(target) {
+      return target.tagName === 'BUTTON' || 
+             target.closest('button') !== null ||
+             target.closest('.top-right-controls') !== null ||
+             target.closest('#gameOver') !== null ||
+             target.closest('#helpModal') !== null;
+    }
+
+    gameContainer.addEventListener('touchstart', (e) => {
+      if (isInteractiveElement(e.target)) return;
+      if (isAnimating || gameOver || autodriveActive) return;
+      e.preventDefault();
+      const touch = e.touches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+    }, { passive: false });
+
+    gameContainer.addEventListener('touchend', (e) => {
+      if (isInteractiveElement(e.target)) return;
+      if (isAnimating || gameOver || autodriveActive || touchStartX === null || touchStartY === null) {
+        touchStartX = null;
+        touchStartY = null;
+        return;
+      }
+      e.preventDefault();
+      const touch = e.changedTouches[0];
+      const touchEndX = touch.clientX;
+      const touchEndY = touch.clientY;
+      
+      const deltaX = touchEndX - touchStartX;
+      const deltaY = touchEndY - touchStartY;
+      const absDeltaX = Math.abs(deltaX);
+      const absDeltaY = Math.abs(deltaY);
+      
+      if (absDeltaX > minSwipeDistance || absDeltaY > minSwipeDistance) {
+        const oldBoard = JSON.stringify(board);
+        if (absDeltaX > absDeltaY) {
+          if (deltaX > 0) {
+            moveRight();
+          } else {
+            moveLeft();
+          }
+        } else {
+          if (deltaY > 0) {
+            moveDown();
+          } else {
+            moveUp();
+          }
+        }
+        
+        if (JSON.stringify(board) !== oldBoard) {
+          const checkAndAddTile = () => {
+            if (!isAnimating) {
+              addTile();
+              syncTilesFromBoard();
+              tiles.forEach(tile => {
+                let wasThere = false;
+                for (let i = 0; i < size; i++) {
+                  for (let j = 0; j < size; j++) {
+                    if (i === tile.row && j === tile.col && board[i][j] === tile.value) {
+                      wasThere = true;
+                      break;
+                    }
+                  }
+                  if (wasThere) break;
+                }
+                if (!wasThere) {
+                  tile.isNew = true;
+                  tile.prevRow = tile.row;
+                  tile.prevCol = tile.col;
+                }
+              });
+              drawBoard();
+              updateScores();
+              if (!hasAvailableMoves()) {
+                showGameOver();
+              }
+            } else {
+              requestAnimationFrame(checkAndAddTile);
+            }
+          };
+          requestAnimationFrame(checkAndAddTile);
+        }
+      }
+      
+      touchStartX = null;
+      touchStartY = null;
+    }, { passive: false });
+
+    gameContainer.addEventListener('touchmove', (e) => {
+      if (isInteractiveElement(e.target)) return;
+      if (touchStartX !== null && touchStartY !== null) {
+        e.preventDefault();
+      }
+    }, { passive: false });
 
     // Autodrive AI functions
     function evaluateMove(direction) {
@@ -1637,10 +2034,6 @@
               });
               drawBoard();
               updateScores();
-              if (score > highscore) {
-                highscore = score;
-                localStorage.setItem('highscore', highscore);
-              }
               
               // Check for game over after move completes
               if (!hasAvailableMoves()) {
