@@ -1335,6 +1335,61 @@
             this.playTone(freq, 0.08, 'square', 0.15);
           }, index * 30);
         });
+      },
+      
+      playLaunch() {
+        // Hypercar/spaceship launch sound - accelerating pitch with engine-like quality
+        if (!this.enabled || !this.audioContext) return;
+        
+        // Resume audio context if suspended
+        if (this.audioContext.state === 'suspended') {
+          this.audioContext.resume().catch(() => {});
+        }
+        
+        try {
+          const now = this.audioContext.currentTime;
+          const duration = 1.2;
+          
+          // Main engine sound - accelerating frequency
+          const oscillator1 = this.audioContext.createOscillator();
+          const gainNode1 = this.audioContext.createGain();
+          
+          oscillator1.connect(gainNode1);
+          gainNode1.connect(this.audioContext.destination);
+          
+          oscillator1.type = 'sawtooth';
+          oscillator1.frequency.setValueAtTime(80, now);
+          oscillator1.frequency.exponentialRampToValueAtTime(400, now + duration);
+          
+          gainNode1.gain.setValueAtTime(0.0001, now);
+          gainNode1.gain.exponentialRampToValueAtTime(0.25, now + 0.1);
+          gainNode1.gain.setValueAtTime(0.25, now + duration - 0.05);
+          gainNode1.gain.exponentialRampToValueAtTime(0.1, now + duration);
+          
+          oscillator1.start(now);
+          oscillator1.stop(now + duration);
+          
+          // Secondary higher frequency for engine rev
+          const oscillator2 = this.audioContext.createOscillator();
+          const gainNode2 = this.audioContext.createGain();
+          
+          oscillator2.connect(gainNode2);
+          gainNode2.connect(this.audioContext.destination);
+          
+          oscillator2.type = 'square';
+          oscillator2.frequency.setValueAtTime(120, now);
+          oscillator2.frequency.exponentialRampToValueAtTime(600, now + duration);
+          
+          gainNode2.gain.setValueAtTime(0.0001, now);
+          gainNode2.gain.exponentialRampToValueAtTime(0.15, now + 0.15);
+          gainNode2.gain.setValueAtTime(0.15, now + duration - 0.05);
+          gainNode2.gain.exponentialRampToValueAtTime(0.08, now + duration);
+          
+          oscillator2.start(now);
+          oscillator2.stop(now + duration);
+        } catch (e) {
+          console.warn('Error playing launch sound:', e);
+        }
       }
     };
     
@@ -2471,6 +2526,7 @@
       autodriveActive = !autodriveActive;
       
       if (autodriveActive) {
+        SoundManager.playLaunch();
         autodriveBtn.classList.add('active');
         autodriveBtn.textContent = 'Stop';
         makeAutodriveMove();
