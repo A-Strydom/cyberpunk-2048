@@ -1379,7 +1379,7 @@
         
         try {
           const now = this.audioContext.currentTime;
-          const duration = 1.2;
+          const duration = 0.6;
           
           // Main engine sound - accelerating frequency
           const oscillator1 = this.audioContext.createOscillator();
@@ -1393,9 +1393,9 @@
           oscillator1.frequency.exponentialRampToValueAtTime(400, now + duration);
           
           gainNode1.gain.setValueAtTime(0.0001, now);
-          gainNode1.gain.exponentialRampToValueAtTime(0.25, now + 0.1);
-          gainNode1.gain.setValueAtTime(0.25, now + duration - 0.05);
-          gainNode1.gain.exponentialRampToValueAtTime(0.1, now + duration);
+          gainNode1.gain.exponentialRampToValueAtTime(0.125, now + 0.1);
+          gainNode1.gain.setValueAtTime(0.125, now + duration - 0.05);
+          gainNode1.gain.exponentialRampToValueAtTime(0.05, now + duration);
           
           oscillator1.start(now);
           oscillator1.stop(now + duration);
@@ -1412,9 +1412,9 @@
           oscillator2.frequency.exponentialRampToValueAtTime(600, now + duration);
           
           gainNode2.gain.setValueAtTime(0.0001, now);
-          gainNode2.gain.exponentialRampToValueAtTime(0.15, now + 0.15);
-          gainNode2.gain.setValueAtTime(0.15, now + duration - 0.05);
-          gainNode2.gain.exponentialRampToValueAtTime(0.08, now + duration);
+          gainNode2.gain.exponentialRampToValueAtTime(0.075, now + 0.15);
+          gainNode2.gain.setValueAtTime(0.075, now + duration - 0.05);
+          gainNode2.gain.exponentialRampToValueAtTime(0.04, now + duration);
           
           oscillator2.start(now);
           oscillator2.stop(now + duration);
