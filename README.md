@@ -16,11 +16,13 @@ A cyberpunk-themed implementation of the classic 2048 puzzle game with stunning 
 - 🤖 **Intelligent Autodrive Mode**: Advanced AI with bottom-left corner strategy and smart decision-making
 - ⚡ **Autodrive Speed Control**: Adjustable speed from 0.5x to 5x with smooth slider control
 - 🎚️ **Difficulty Levels**: Easy (4x4), Normal (5x5), and Hard (6x6) modes with dynamic spawn probabilities
+- 🎲 **Cheat Codes**: Enter "NETRUNNER" to activate cheat mode and double any tile by clicking/tapping it
 - 📱 **Fully Responsive**: Optimized for desktop, mobile portrait, and landscape orientations
 - 💾 **Local Storage**: High score and preferences persistence (sound, difficulty, autodrive speed)
 - ⚡ **Glitch Effects**: Cyberpunk-style visual effects on interactions
-- 🍎 **iOS Home Screen Support**: Add to home screen with custom icon and app-like experience
+- 🍎 **iOS Home Screen Support**: Add to home screen with custom PNG icon and app-like experience
 - 🎮 **Touch Optimized**: Large touch targets and swipe gestures for mobile gameplay
+- 🎯 **Smart Menu System**: Easy-to-access menu with difficulty, sound, cheat, and help options
 
 ## 🎮 How to Play
 
@@ -29,10 +31,14 @@ A cyberpunk-themed implementation of the classic 2048 puzzle game with stunning 
 3. Try to create a tile with the number **2048**!
 4. Click **REBOOT** to restart the game (reloads page to fetch latest version)
 5. Click **Autodrive** to watch the AI play automatically
-6. Adjust **difficulty** from the dropdown (Easy/Normal/Hard)
-7. Toggle **sound** on/off from the menu
-8. Control **Autodrive speed** with the slider (0.5x - 5x) when Autodrive is active
-9. Double-click/tap the speed value (e.g., "1x") to reset to normal speed
+6. Open the **menu** (☰) to access:
+   - **Sound toggle**: Enable/disable sounds
+   - **Difficulty**: Select Easy (4x4), Normal (5x5), or Hard (6x6) from the modal
+   - **Cheat**: Enter "NETRUNNER" to activate cheat mode
+   - **Help**: View game instructions
+7. Control **Autodrive speed** with the slider (0.5x - 5x) when Autodrive is active
+8. Double-click/tap the speed value (e.g., "1x") to reset to normal speed
+9. Click/tap anywhere outside the menu to close it
 
 ## 🚀 Getting Started
 
@@ -76,17 +82,30 @@ Choose from three difficulty levels, each with different board sizes and spawn p
 - **Normal**: 5x5 grid, balanced spawn probabilities (default)
 - **Hard**: 6x6 grid, higher probability of spawning 4s
 
-Difficulty preference is saved to localStorage and persists across sessions.
+Difficulty can be changed from the menu, and your preference is saved to localStorage and persists across sessions.
+
+## 🎲 Cheat Codes
+
+Activate special abilities by entering cheat codes:
+
+- **NETRUNNER**: Enter this code (case-insensitive) in the cheat menu to activate cheat mode
+  - Once activated, click or tap any tile to double its value
+  - Perfect for testing strategies or reaching higher scores
+  - Cheat mode resets when you restart the game
+
+Access the cheat menu from the main menu (☰) → **↯ CHEAT**.
 
 ## 🤖 Autodrive Mode
 
 The Autodrive AI uses an advanced heuristic algorithm that:
 
-- **Corner Strategy**: Keeps the highest tile in the bottom-left corner
+- **Snake Pattern Strategy**: Keeps the highest tile in the bottom-left corner and builds in a snake pattern upward
+- **Corner Strategy**: Maintains the highest tile in the bottom-left corner
 - **Smart Merging**: Prioritizes moves that create merges
 - **Monotonic Ordering**: Maintains decreasing values from bottom-left to top-right
 - **Game-Over Prevention**: Avoids moves that lead to dead ends
 - **Direction Preference**: Favors down and left moves for optimal positioning
+- **Smoothness Bonus**: Encourages smooth transitions and pattern maintenance
 
 ### Speed Control
 
@@ -117,8 +136,10 @@ The game uses CSS custom properties and can be easily customized by modifying th
 - **Responsive Media Queries**: Support for portrait, landscape, and various screen sizes
 - **Touch Events**: Swipe gesture detection for mobile gameplay
 - **iOS Meta Tags**: Apple touch icon and web app capabilities for home screen installation
+- **PNG Icon Support**: Multiple icon sizes (180x180, 152x152, 120x120, 76x76) for optimal iOS display
 - **Google Fonts**: Share Tech Mono and Sixtyfour fonts
-- **AI Algorithm**: Heuristic-based evaluation function with weighted scoring
+- **AI Algorithm**: Heuristic-based evaluation function with weighted scoring and snake pattern strategy
+- **Dynamic Font Scaling**: Large numbers (6+ digits) automatically scale to fit within tiles
 
 ## 📝 License
 
@@ -130,12 +151,25 @@ This project is open source and available under the [MIT License](LICENSE).
 - Cyberpunk aesthetic inspired by classic sci-fi themes
 - Fonts: [Share Tech Mono](https://fonts.google.com/specimen/Share+Tech+Mono) and [Sixtyfour](https://fonts.google.com/specimen/Sixtyfour)
 
+## 📁 Project Structure
+
+```
+cyberpunk-2048/
+├── index.html          # Main game file (HTML, CSS, JavaScript)
+├── images/            # Icon files
+│   ├── 2048-logo.png  # Main app icon
+│   └── icon-*.png     # iOS home screen icons (various sizes)
+├── README.md          # This file
+└── LICENSE           # MIT License
+```
+
 ## 🎯 Future Enhancements
 
 - [ ] Theme variations
 - [ ] Leaderboard system
 - [ ] Additional sound effect options
 - [ ] Custom color schemes
+- [ ] More cheat codes
 
 ---
 
