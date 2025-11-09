@@ -1662,6 +1662,7 @@
       <p>You are about to flatline. Choose your path:</p>
       <div class="confirm-buttons">
         <button id="tracebackBtn" class="confirm-btn">TRACEBACK</button>
+        <button id="crosslinkBtn" class="confirm-btn">CROSSLINK TILES</button>
         <button id="acceptFateBtn" class="confirm-btn">ACCEPT FATE</button>
       </div>
     </div>
@@ -4124,15 +4125,135 @@
       });
     }
     
+    // Crosslink function: merge pairs from low to high, then arrange in snake pattern
+    function crosslinkTiles() {
+      // Turn off autodrive if it's active
+      if (autodriveActive) {
+        autodriveActive = false;
+        if (autodriveTimeout) {
+          clearTimeout(autodriveTimeout);
+          autodriveTimeout = null;
+        }
+        autodriveBtn.classList.remove('active');
+        updateAutodriveButtonText('Autodrive');
+        const speedControl = document.getElementById('autodriveSpeedControl');
+        if (autodriveBtn) autodriveBtn.style.display = 'flex';
+        if (speedControl) speedControl.style.display = 'none';
+      }
+      
+      // Collect all tile values from the board
+      const tileValues = [];
+      for (let i = 0; i < size; i++) {
+        for (let j = 0; j < size; j++) {
+          if (board[i][j] !== 0) {
+            tileValues.push(board[i][j]);
+          }
+        }
+      }
+      
+      // Sort from lowest to highest
+      tileValues.sort((a, b) => a - b);
+      
+      // Merge pairs iteratively until no more merges are possible
+      let currentValues = [...tileValues];
+      let hasMerged = true;
+      
+      while (hasMerged) {
+        hasMerged = false;
+        const nextValues = [];
+        let i = 0;
+        
+        while (i < currentValues.length) {
+          if (i < currentValues.length - 1 && currentValues[i] === currentValues[i + 1]) {
+            // Merge pair
+            const merged = currentValues[i] * 2;
+            nextValues.push(merged);
+            score += merged; // Add to score
+            hasMerged = true;
+            i += 2; // Skip both tiles
+          } else {
+            // Orphan tile, keep it
+            nextValues.push(currentValues[i]);
+            i += 1;
+          }
+        }
+        
+        currentValues = nextValues;
+        // Re-sort after each merge pass to ensure pairs are adjacent
+        currentValues.sort((a, b) => a - b);
+      }
+      
+      // Sort remaining tiles from highest to lowest for snake pattern
+      currentValues.sort((a, b) => b - a);
+      
+      // Clear the board
+      board = Array.from({ length: size }, () => Array(size).fill(0));
+      
+      // Arrange tiles in snake pattern: bottom-left, moving right along bottom row, then up and left, etc.
+      // Pattern: Start at (size-1, 0), go right to (size-1, size-1), then up to (size-2, size-1), then left to (size-2, 0), etc.
+      let row = size - 1;
+      let col = 0;
+      let direction = 'right'; // right, left
+      
+      for (let value of currentValues) {
+        if (row < 0 || col >= size) break; // Board is full or out of bounds
+        
+        board[row][col] = value;
+        
+        // Determine next position based on snake pattern
+        if (direction === 'right') {
+          if (col < size - 1) {
+            col++; // Move right
+          } else {
+            // Reached right edge, move up one row and change direction to left
+            row--;
+            if (row >= 0) {
+              direction = 'left';
+            }
+          }
+        } else { // direction === 'left'
+          if (col > 0) {
+            col--; // Move left
+          } else {
+            // Reached left edge, move up one row and change direction to right
+            row--;
+            if (row >= 0) {
+              direction = 'right';
+            }
+          }
+        }
+      }
+      
+      // Sync tiles from board
+      syncTilesFromBoard();
+      
+      // Update scores and redraw
+      updateScores();
+      drawBoard();
+      
+      // Check if game is still over
+      if (!hasAvailableMoves()) {
+        showGameOver();
+      }
+    }
+    
     // Traceback modal handlers
     const tracebackModal = document.getElementById('tracebackModal');
     const tracebackBtn = document.getElementById('tracebackBtn');
+    const crosslinkBtn = document.getElementById('crosslinkBtn');
     const acceptFateBtn = document.getElementById('acceptFateBtn');
     
     if (tracebackBtn) {
       tracebackBtn.addEventListener('click', () => {
         if (tracebackModal) tracebackModal.classList.remove('show');
         undoMove();
+      });
+    }
+    
+    if (crosslinkBtn) {
+      crosslinkBtn.addEventListener('click', () => {
+        if (tracebackModal) tracebackModal.classList.remove('show');
+        crosslinkTiles();
       });
     }
     

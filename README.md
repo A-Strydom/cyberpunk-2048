@@ -18,6 +18,7 @@ A cyberpunk-themed implementation of the classic 2048 puzzle game with stunning 
 - 🎚️ **Difficulty Levels**: Easy (4x4), Normal (5x5), and Hard (6x6) modes with dynamic spawn probabilities
 - 🎲 **Cheat Codes**: Multiple cheat codes available (NETRUNNER, FLATLINE, TRACEBACK) with special abilities
 - ⏪ **Undo/Redo System**: Undo and redo moves with TRACEBACK cheat code, works with autodrive mode
+- 🔗 **Crosslink Tiles**: Merge all matching pairs and arrange tiles in snake pattern when game is about to end
 - 🎨 **Material Icons**: Modern Material Design icons throughout the interface for a polished look
 - 🗑️ **Clear High Score**: Reset your high score with a confirmation modal
 - 🎨 **Enhanced Tile Visuals**: Gradient depth effects, border glow, and top highlights for 3D appearance
@@ -48,7 +49,10 @@ A cyberpunk-themed implementation of the classic 2048 puzzle game with stunning 
 11. Press **Escape** key to close any open modal
 12. Click/tap anywhere outside modals to close them
 13. The game automatically redraws tiles when the window is resized
-14. When **TRACEBACK** is active and the game is about to end, choose "TRACEBACK" to undo or "ACCEPT FATE" to proceed to game over
+14. When **TRACEBACK** is active and the game is about to end, choose from three options:
+    - **TRACEBACK**: Undo your last move
+    - **CROSSLINK TILES**: Merge all matching pairs (lowest to highest) and arrange remaining tiles in snake pattern
+    - **ACCEPT FATE**: Proceed to game over screen
 
 ## 🚀 Getting Started
 
@@ -112,8 +116,11 @@ Activate special abilities by entering cheat codes in the cheat menu:
   - Undo and redo buttons (⏪ ⏩) will appear next to the sound icon
   - Click undo to revert your last move, or redo to restore a move you undid
   - Works with both manual moves and autodrive mode
-  - When the game is about to end (flatline), a modal will appear asking if you want to "TRACEBACK" (undo) or "ACCEPT FATE" (proceed to game over)
-  - If you choose TRACEBACK during autodrive, autodrive will automatically turn off
+  - When the game is about to end (flatline), a modal will appear with three options:
+    - **TRACEBACK**: Undo your last move (turns off autodrive if active)
+    - **CROSSLINK TILES**: Automatically merge all matching pairs from lowest to highest (e.g., 2+2→4, 4+4→8, 8+8→16), then arrange remaining tiles in a snake pattern starting from bottom-left and moving right. All merge points are added to your score.
+    - **ACCEPT FATE**: Proceed to game over screen
+  - If you choose TRACEBACK or CROSSLINK TILES during autodrive, autodrive will automatically turn off
   - Perfect for experimenting with different strategies and learning optimal moves
   - Undo stack is limited to the last 50 moves to prevent memory issues
 
