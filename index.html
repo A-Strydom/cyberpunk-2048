@@ -1270,6 +1270,18 @@
         }
       },
       
+      // Ensure audio context is resumed (required for mobile browsers)
+      async ensureResumed() {
+        if (!this.audioContext) return;
+        if (this.audioContext.state === 'suspended') {
+          try {
+            await this.audioContext.resume();
+          } catch (e) {
+            console.warn('Failed to resume audio context:', e);
+          }
+        }
+      },
+      
       toggle() {
         this.enabled = !this.enabled;
         localStorage.setItem('soundEnabled', this.enabled.toString());
@@ -1280,13 +1292,11 @@
         }
       },
       
-      playTone(frequency, duration, type = 'sine', volume = 0.3) {
+      async playTone(frequency, duration, type = 'sine', volume = 0.3) {
         if (!this.enabled || !this.audioContext) return;
         
         // Resume audio context if suspended (required by browsers)
-        if (this.audioContext.state === 'suspended') {
-          this.audioContext.resume().catch(() => {});
-        }
+        await this.ensureResumed();
         
         try {
           const now = this.audioContext.currentTime;
@@ -1311,14 +1321,16 @@
         }
       },
       
-      playMove() {
+      async playMove() {
         // Play next note in the sequence
+        await this.ensureResumed();
         const note = this.getNextAutodriveNote();
         this.playTone(note, 0.12, 'sine', 0.2);
       },
       
-      playMerge(value) {
+      async playMerge(value) {
         // Play a chord (note + fifth) for merges
+        await this.ensureResumed();
         const note = this.getNextAutodriveNote();
         const fifth = note * 1.5; // Perfect fifth interval
         this.playTone(note, 0.18, 'sine', 0.22);
@@ -1327,8 +1339,9 @@
         }, 30);
       },
       
-      playGameOver() {
+      async playGameOver() {
         // Descending tone sequence for game over
+        await this.ensureResumed();
         const frequencies = [300, 250, 200, 150];
         frequencies.forEach((freq, index) => {
           setTimeout(() => {
@@ -1337,18 +1350,21 @@
         });
       },
       
-      playNewTile() {
+      async playNewTile() {
         // Subtle pop for new tile
+        await this.ensureResumed();
         this.playTone(250, 0.1, 'sine', 0.15);
       },
       
-      playInvalidMove() {
+      async playInvalidMove() {
         // Low, short error sound for invalid moves
+        await this.ensureResumed();
         this.playTone(100, 0.15, 'sawtooth', 0.2);
       },
       
-      playGlitch() {
+      async playGlitch() {
         // Glitchy, distorted sound with multiple tones
+        await this.ensureResumed();
         const frequencies = [200, 150, 250, 180];
         frequencies.forEach((freq, index) => {
           setTimeout(() => {
@@ -1357,14 +1373,12 @@
         });
       },
       
-      playLaunch() {
+      async playLaunch() {
         // Hypercar/spaceship launch sound - accelerating pitch with engine-like quality
         if (!this.enabled || !this.audioContext) return;
         
         // Resume audio context if suspended
-        if (this.audioContext.state === 'suspended') {
-          this.audioContext.resume().catch(() => {});
-        }
+        await this.ensureResumed();
         
         try {
           const now = this.audioContext.currentTime;
@@ -1412,14 +1426,12 @@
         }
       },
       
-      playStop() {
+      async playStop() {
         // Deceleration/shutdown sound - descending pitch
         if (!this.enabled || !this.audioContext) return;
         
         // Resume audio context if suspended
-        if (this.audioContext.state === 'suspended') {
-          this.audioContext.resume().catch(() => {});
-        }
+        await this.ensureResumed();
         
         try {
           const now = this.audioContext.currentTime;
@@ -1468,6 +1480,24 @@
     
     // Initialize sound manager
     SoundManager.init();
+
+    // Resume audio context on first user interaction (required for mobile browsers)
+    let audioContextResumed = false;
+    function resumeAudioOnInteraction() {
+      if (!audioContextResumed && SoundManager.audioContext) {
+        audioContextResumed = true;
+        SoundManager.ensureResumed().then(() => {
+          // Audio context is now active
+        }).catch(() => {
+          // Failed to resume, but that's okay
+        });
+      }
+    }
+    
+    // Add listeners for common user interactions
+    document.addEventListener('touchstart', resumeAudioOnInteraction, { once: true, passive: true });
+    document.addEventListener('click', resumeAudioOnInteraction, { once: true });
+    document.addEventListener('keydown', resumeAudioOnInteraction, { once: true });
 
     function initGame() {
       // Stop any ongoing animations
@@ -2648,10 +2678,11 @@
       autodriveBtn.classList.remove('active');
       autodriveBtn.textContent = 'Autodrive';
       
-      // Delay game restart slightly to let animations play
+      // Reload the page to get latest version (high scores persist in localStorage)
+      // Delay slightly to let animations play
       setTimeout(() => {
-        initGame();
-      }, 300);
+        window.location.reload();
+      }, 500);
     });
     restartGameBtn.addEventListener('click', () => {
       autodriveActive = false;
