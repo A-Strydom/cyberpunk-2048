@@ -212,13 +212,15 @@
     }
     .select-wrapper {
       position: relative;
+      display: inline-block;
+      height: fit-content;
     }
     .select-wrapper::before {
       content: '';
       position: absolute;
       left: 4px;
-      top: 0;
-      bottom: 0;
+      top: 1px;
+      height: calc(100% - 2px);
       width: 1px;
       background: #00f5ff;
       pointer-events: none;
@@ -2298,12 +2300,16 @@
     function isInteractiveElement(target) {
       return target.tagName === 'BUTTON' || 
              target.closest('button') !== null ||
+             target.closest('select') !== null ||
              target.closest('.top-right-controls') !== null ||
+             target.closest('.bottom-left-controls') !== null ||
              target.closest('#gameOver') !== null ||
-             target.closest('#helpModal') !== null;
+             target.closest('#helpModal') !== null ||
+             target.closest('.menu-dropdown') !== null;
     }
 
-    gameContainer.addEventListener('touchstart', (e) => {
+    // Attach touch handlers to document to capture swipes anywhere on screen
+    document.addEventListener('touchstart', (e) => {
       if (isInteractiveElement(e.target)) return;
       if (isAnimating || gameOver || autodriveActive) return;
       e.preventDefault();
@@ -2312,7 +2318,7 @@
       touchStartY = touch.clientY;
     }, { passive: false });
 
-    gameContainer.addEventListener('touchend', (e) => {
+    document.addEventListener('touchend', (e) => {
       if (isInteractiveElement(e.target)) return;
       if (isAnimating || gameOver || autodriveActive || touchStartX === null || touchStartY === null) {
         touchStartX = null;
@@ -2387,7 +2393,7 @@
       touchStartY = null;
     }, { passive: false });
 
-    gameContainer.addEventListener('touchmove', (e) => {
+    document.addEventListener('touchmove', (e) => {
       if (isInteractiveElement(e.target)) return;
       if (touchStartX !== null && touchStartY !== null) {
         e.preventDefault();
