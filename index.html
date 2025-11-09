@@ -18,6 +18,7 @@
   <link rel="apple-touch-icon" sizes="76x76" href="images/icon-76x76.png">
   <link rel="apple-touch-icon" href="images/icon-180x180.png">
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Sixtyfour&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <style>
@@ -298,8 +299,8 @@
       pointer-events: none;
       z-index: 1;
     }
-    #restart::after {
-      content: '↻';
+    #restart .material-icons {
+      font-family: 'Material Icons';
       font-size: 16px;
       color: #00f5ff;
       text-shadow: 0 0 8px #00f5ff;
@@ -307,11 +308,23 @@
       position: relative;
       z-index: 1;
       display: inline-block;
+      line-height: 1;
     }
     #restart:hover {
       background: rgba(10, 10, 30, 0.95);
       box-shadow: 0 0 15px rgba(255, 107, 53, 0.8);
       text-shadow: 0 0 10px #00f5ff;
+    }
+    #restart:active {
+      background: rgba(255, 107, 53, 0.2);
+      border-color: #ff0040;
+      color: #ff0040;
+      box-shadow: 0 0 20px rgba(255, 0, 64, 0.8);
+      text-shadow: 0 0 10px #ff0040;
+    }
+    #restart:active .material-icons {
+      color: #ff0040;
+      text-shadow: 0 0 10px #ff0040;
     }
     #restart.clicking {
       animation: buttonGlitch 0.4s ease;
@@ -534,14 +547,16 @@
       pointer-events: none;
       z-index: 1;
     }
-    #autodrive::after {
-      content: '▶';
-      font-size: 12px;
+    #autodrive .material-icons {
+      font-family: 'Material Icons';
+      font-size: 16px;
       color: #00f5ff;
       text-shadow: 0 0 8px #00f5ff;
       margin-left: auto;
       position: relative;
       z-index: 1;
+      display: inline-block;
+      line-height: 1;
     }
     #autodrive:hover {
       background: rgba(10, 10, 30, 0.95);
@@ -760,7 +775,7 @@
       text-shadow: 0 0 6px rgba(255, 235, 59, 0.8);
       margin: 0 2px;
     }
-    #difficultyModal, #cheatModal {
+    #difficultyModal, #cheatModal, #confirmModal {
       position: fixed;
       top: 0;
       left: 0;
@@ -774,7 +789,7 @@
       z-index: 1000;
       animation: fadeIn 0.3s ease;
     }
-    #difficultyModal.show, #cheatModal.show {
+    #difficultyModal.show, #cheatModal.show, #confirmModal.show {
       display: flex;
     }
     .difficulty-options {
@@ -897,6 +912,48 @@
       color: rgba(0, 245, 255, 0.7);
       font-style: italic;
     }
+    .confirm-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 30px;
+      width: 100%;
+    }
+    .confirm-btn {
+      background: rgba(0, 0, 0, 0.5);
+      border: 2px solid #00f5ff;
+      border-radius: 6px;
+      padding: 15px 30px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 16px;
+      color: #00f5ff;
+      text-shadow: 0 0 6px #00f5ff;
+      box-shadow: 0 0 10px rgba(0, 245, 255, 0.3);
+      outline: none;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: bold;
+    }
+    .confirm-btn:hover {
+      background: rgba(0, 245, 255, 0.1);
+      border-color: #ffeb3b;
+      box-shadow: 0 0 20px rgba(255, 235, 59, 0.5);
+      text-shadow: 0 0 10px #ffeb3b;
+      transform: scale(1.05);
+      color: #ffeb3b;
+    }
+    .confirm-btn:active {
+      transform: scale(0.98);
+    }
+    #confirmYes:hover {
+      border-color: #ff0040;
+      box-shadow: 0 0 20px rgba(255, 0, 64, 0.5);
+      text-shadow: 0 0 10px #ff0040;
+      color: #ff0040;
+    }
     .game-title {
       position: fixed;
       top: 40px;
@@ -906,7 +963,9 @@
     }
     .title-menu {
       position: relative;
-      display: inline-block;
+      display: flex;
+      align-items: center;
+      gap: 0;
     }
     #menuToggle {
       background: transparent;
@@ -929,6 +988,39 @@
     #menuToggle:hover {
       text-shadow: 0 0 10px #00f5ff;
       transform: scale(1.1);
+    }
+    #soundBtn {
+      background: transparent;
+      color: #00f5ff;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 28px;
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      cursor: pointer;
+      text-shadow: 0 0 6px #00f5ff;
+      transition: text-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+      border: none;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      margin-left: 8px;
+    }
+    #soundBtn .material-icons {
+      font-family: 'Material Icons';
+      font-size: 28px;
+      color: inherit;
+      line-height: 1;
+      display: inline-block;
+    }
+    #soundBtn:hover {
+      text-shadow: 0 0 10px #00f5ff;
+      transform: scale(1.1);
+    }
+    #soundBtn.muted {
+      opacity: 0.5;
     }
     .menu-dropdown {
       position: absolute;
@@ -978,8 +1070,14 @@
       background: rgba(0, 245, 255, 0.1);
       text-shadow: 0 0 10px #00f5ff;
     }
-    .menu-dropdown #soundBtn.muted {
-      opacity: 0.5;
+    .menu-dropdown button .material-icons {
+      font-family: 'Material Icons';
+      font-size: 12px;
+      color: inherit;
+      line-height: 1;
+      display: inline-block;
+      margin-right: 4px;
+      vertical-align: middle;
     }
     .game-title-main {
       font-size: 25px;
@@ -1047,6 +1145,16 @@
         font-size: 24px;
         width: 36px;
         height: 36px;
+      }
+
+      #soundBtn {
+        font-size: 24px;
+        width: 36px;
+        height: 36px;
+      }
+
+      #soundBtn .material-icons {
+        font-size: 24px;
       }
 
       .menu-dropdown {
@@ -1236,6 +1344,16 @@
         height: 36px;
       }
 
+      #soundBtn {
+        font-size: 24px;
+        width: 36px;
+        height: 36px;
+      }
+
+      #soundBtn .material-icons {
+        font-size: 24px;
+      }
+
       .menu-dropdown {
         bottom: 36px;
         min-width: 160px;
@@ -1332,8 +1450,8 @@
   <div class="text-artifacts-extra"></div>
   <div class="geometric-lines"></div>
   <div class="top-right-controls">
-    <button id="restart" title="Restart">REBOOT</button>
-    <button id="autodrive">Autodrive</button>
+    <button id="restart" title="Restart">REBOOT<span class="material-icons">power_settings_new</span></button>
+    <button id="autodrive">Autodrive<span class="material-icons">auto_mode</span></button>
     <div id="autodriveSpeedControl" class="autodrive-speed-control" style="display: none;">
       <div class="autodrive-header">
         <div class="autodrive-mode-label">AUTODRIVE MODE</div>
@@ -1349,11 +1467,12 @@
   <div class="bottom-left-controls">
     <div class="title-menu">
       <button id="menuToggle" title="Menu">☰</button>
+      <button id="soundBtn" title="Toggle Sound"><span class="material-icons">volume_up</span></button>
       <div class="menu-dropdown" id="menuDropdown">
-        <button id="soundBtn" title="Toggle Sound"></button>
-        <button id="difficultyBtn" title="Difficulty">⚙ DIFFICULTY</button>
-        <button id="cheatBtn" title="Cheat Codes">↯ CHEAT</button>
-        <button id="helpBtn" title="How to Play">? HELP</button>
+        <button id="clearHighScoreBtn" title="Clear High Score"><span class="material-icons">do_not_disturb</span> CLEAR HIGH SCORE</button>
+        <button id="difficultyBtn" title="Difficulty"><span class="material-icons">settings</span> DIFFICULTY</button>
+        <button id="cheatBtn" title="Cheat Codes"><span class="material-icons">terminal</span> CHEAT</button>
+        <button id="helpBtn" title="How to Play"><span class="material-icons">help</span> HELP</button>
       </div>
     </div>
   </div>
@@ -1425,6 +1544,16 @@
       </ul>
     </div>
   </div>
+  <div id="confirmModal">
+    <div class="help-content">
+      <h2>CONFIRM</h2>
+      <p>Are you sure you want to clear your high score?</p>
+      <div class="confirm-buttons">
+        <button id="confirmYes" class="confirm-btn">YES</button>
+        <button id="confirmNo" class="confirm-btn">NO - ONE MORE GIG</button>
+      </div>
+    </div>
+  </div>
   <div id="ui" style="display: none;"></div>
   <div id="game-container">
     <canvas id="game"></canvas>
@@ -1461,6 +1590,18 @@
     const finalScoreEl = document.getElementById('finalScore');
     const restartGameBtn = document.getElementById('restartGame');
     const autodriveBtn = document.getElementById('autodrive');
+
+    // Helper function to update autodrive button text while preserving the Material Icon
+    function updateAutodriveButtonText(text) {
+      if (autodriveBtn) {
+        const icon = autodriveBtn.querySelector('.material-icons');
+        if (icon) {
+          autodriveBtn.innerHTML = text + '<span class="material-icons">auto_mode</span>';
+        } else {
+          autodriveBtn.textContent = text;
+        }
+      }
+    }
 
     let size = 4; // Dynamic based on difficulty
     const gap = 10;
@@ -1507,8 +1648,18 @@
       tileSize = (logicalSize - totalGaps) / size;
       if (tileSize <= 0) tileSize = 50;
       
-      // Don't auto-redraw here - let initGame handle it
+      // Redraw the board if the game has been initialized
+      if (board && tiles) {
+        drawBoard();
+      }
     }
+
+    // Initialize game state variables before resizeCanvas can access them
+    let board = null, score, highscore;
+    let tiles = []; // Array of tile objects with position and animation data
+    let isAnimating = false;
+    let mergeAnimations = []; // Array of merge animations to render
+    let gameOver = false;
 
     // Debounce resize to prevent performance issues
     let resizeTimeout = null;
@@ -1522,12 +1673,6 @@
     window.addEventListener('orientationchange', () => {
       setTimeout(resizeCanvas, 100);
     });
-
-    let board, score, highscore;
-    let tiles = []; // Array of tile objects with position and animation data
-    let isAnimating = false;
-    let mergeAnimations = []; // Array of merge animations to render
-    let gameOver = false;
     let autodriveActive = false;
     let autodriveTimeout = null;
     let autodriveSpeedMultiplier = 1; // Default speed multiplier (1x = normal)
@@ -1570,12 +1715,15 @@
       updateButton() {
         const soundBtn = document.getElementById('soundBtn');
         if (soundBtn) {
-          if (this.enabled) {
-            soundBtn.classList.remove('muted');
-            soundBtn.textContent = '♪ DISABLE SOUNDS';
-          } else {
-            soundBtn.classList.add('muted');
-            soundBtn.textContent = '♪ ENABLE SOUNDS';
+          const icon = soundBtn.querySelector('.material-icons');
+          if (icon) {
+            if (this.enabled) {
+              soundBtn.classList.remove('muted');
+              icon.textContent = 'volume_up';
+            } else {
+              soundBtn.classList.add('muted');
+              icon.textContent = 'volume_off';
+            }
           }
         }
       },
@@ -1923,7 +2071,7 @@
           autodriveTimeout = null;
         }
         autodriveBtn.classList.remove('active');
-        autodriveBtn.textContent = 'Autodrive';
+        updateAutodriveButtonText('Autodrive');
       }
     }
 
@@ -2046,7 +2194,7 @@
           autodriveTimeout = null;
         }
         autodriveBtn.classList.remove('active');
-        autodriveBtn.textContent = 'Autodrive';
+        updateAutodriveButtonText('Autodrive');
       }
       
       // Restart game with new difficulty (unless we're still initializing)
@@ -3153,7 +3301,7 @@
         // No valid moves, stop autodrive
         autodriveActive = false;
         autodriveBtn.classList.remove('active');
-        autodriveBtn.textContent = 'Autodrive';
+        updateAutodriveButtonText('Autodrive');
       }
     }
 
@@ -3167,7 +3315,7 @@
         SoundManager.playLaunch();
         SoundManager.resetAutodriveSequence(); // Reset to start of sequence
         autodriveBtn.classList.add('active');
-        autodriveBtn.textContent = 'Stop';
+        updateAutodriveButtonText('Stop');
         // Hide the autodrive button and show speed control
         if (autodriveBtn) autodriveBtn.style.display = 'none';
         if (speedControl) speedControl.style.display = 'flex';
@@ -3180,7 +3328,7 @@
       } else {
         SoundManager.playStop();
         autodriveBtn.classList.remove('active');
-        autodriveBtn.textContent = 'Autodrive';
+        updateAutodriveButtonText('Autodrive');
         // Show the autodrive button and hide speed control
         if (autodriveBtn) autodriveBtn.style.display = 'flex';
         if (speedControl) speedControl.style.display = 'none';
@@ -3265,7 +3413,7 @@
           const speedControl = document.getElementById('autodriveSpeedControl');
           if (autodriveBtn) {
             autodriveBtn.classList.remove('active');
-            autodriveBtn.textContent = 'Autodrive';
+            updateAutodriveButtonText('Autodrive');
             autodriveBtn.style.display = 'flex';
           }
           if (speedControl) {
@@ -3308,7 +3456,7 @@
         autodriveTimeout = null;
       }
       autodriveBtn.classList.remove('active');
-      autodriveBtn.textContent = 'Autodrive';
+      updateAutodriveButtonText('Autodrive');
       
       // Reload the page to get latest version (high scores persist in localStorage)
       // Delay slightly to let animations play
@@ -3323,7 +3471,7 @@
         autodriveTimeout = null;
       }
       autodriveBtn.classList.remove('active');
-      autodriveBtn.textContent = 'Autodrive';
+      updateAutodriveButtonText('Autodrive');
       initGame();
     });
     autodriveBtn.addEventListener('click', toggleAutodrive);
@@ -3357,7 +3505,44 @@
     if (soundBtn) {
       soundBtn.addEventListener('click', () => {
         SoundManager.toggle();
+      });
+    }
+
+    // Clear high score button functionality
+    const clearHighScoreBtn = document.getElementById('clearHighScoreBtn');
+    const confirmModal = document.getElementById('confirmModal');
+    const confirmYes = document.getElementById('confirmYes');
+    const confirmNo = document.getElementById('confirmNo');
+    
+    if (clearHighScoreBtn && confirmModal) {
+      clearHighScoreBtn.addEventListener('click', () => {
+        confirmModal.classList.add('show');
         if (menuDropdown) menuDropdown.classList.remove('show');
+      });
+    }
+
+    // Confirmation modal functionality
+    if (confirmYes) {
+      confirmYes.addEventListener('click', () => {
+        highscore = 0;
+        localStorage.setItem('highscore', '0');
+        updateScores();
+        if (confirmModal) confirmModal.classList.remove('show');
+      });
+    }
+
+    if (confirmNo) {
+      confirmNo.addEventListener('click', () => {
+        if (confirmModal) confirmModal.classList.remove('show');
+      });
+    }
+
+    // Close confirmation modal when clicking outside
+    if (confirmModal) {
+      confirmModal.addEventListener('click', (e) => {
+        if (e.target === confirmModal) {
+          confirmModal.classList.remove('show');
+        }
       });
     }
 
@@ -3617,6 +3802,9 @@
         }
         if (difficultyModal && difficultyModal.classList.contains('show')) {
           difficultyModal.classList.remove('show');
+        }
+        if (confirmModal && confirmModal.classList.contains('show')) {
+          confirmModal.classList.remove('show');
         }
       }
     });
