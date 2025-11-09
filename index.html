@@ -2273,15 +2273,66 @@
         }
 
         const hue = (Math.log2(tile.value) * 35 + 180) % 360;
-        ctx.fillStyle = `hsl(${hue}, 100%, 55%)`;
-        ctx.shadowColor = ctx.fillStyle;
-        ctx.shadowBlur = 20 + (tile.mergeScale ? (tile.mergeScale - 1) * 30 : 0);
-
         const scaledSize = tileSize * scale;
         const offset = (tileSize - scaledSize) / 2;
-        const scaledRadius = cornerRadius * scale; // Scale the radius proportionally
-        fillRoundedRect(x + offset, y + offset, scaledSize, scaledSize, scaledRadius);
+        const scaledRadius = cornerRadius * scale;
+        const tileX = x + offset;
+        const tileY = y + offset;
+
+        // Create gradient for depth effect (subtle, performance-friendly)
+        const gradient = ctx.createLinearGradient(tileX, tileY, tileX, tileY + scaledSize);
+        const baseColor = `hsl(${hue}, 100%, 55%)`;
+        // Very subtle gradient - minimal contrast to avoid banding
+        const lighterColor = `hsl(${hue}, 100%, 57%)`;
+        const darkerColor = `hsl(${hue}, 100%, 53%)`;
+        // Use many color stops for smooth blending
+        gradient.addColorStop(0, lighterColor);
+        gradient.addColorStop(0.15, `hsl(${hue}, 100%, 56.5%)`);
+        gradient.addColorStop(0.3, baseColor);
+        gradient.addColorStop(0.5, baseColor);
+        gradient.addColorStop(0.7, baseColor);
+        gradient.addColorStop(0.85, `hsl(${hue}, 100%, 53.5%)`);
+        gradient.addColorStop(1, darkerColor);
+
+        // Draw tile with shadow
+        ctx.fillStyle = gradient;
+        ctx.shadowColor = baseColor;
+        ctx.shadowBlur = 20 + (tile.mergeScale ? (tile.mergeScale - 1) * 30 : 0);
+        fillRoundedRect(tileX, tileY, scaledSize, scaledSize, scaledRadius);
         ctx.shadowBlur = 0;
+
+        // Add subtle border glow
+        ctx.strokeStyle = `hsla(${hue}, 100%, 70%, 0.4)`;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(tileX + scaledRadius, tileY);
+        ctx.lineTo(tileX + scaledSize - scaledRadius, tileY);
+        ctx.quadraticCurveTo(tileX + scaledSize, tileY, tileX + scaledSize, tileY + scaledRadius);
+        ctx.lineTo(tileX + scaledSize, tileY + scaledSize - scaledRadius);
+        ctx.quadraticCurveTo(tileX + scaledSize, tileY + scaledSize, tileX + scaledSize - scaledRadius, tileY + scaledSize);
+        ctx.lineTo(tileX + scaledRadius, tileY + scaledSize);
+        ctx.quadraticCurveTo(tileX, tileY + scaledSize, tileX, tileY + scaledSize - scaledRadius);
+        ctx.lineTo(tileX, tileY + scaledRadius);
+        ctx.quadraticCurveTo(tileX, tileY, tileX + scaledRadius, tileY);
+        ctx.closePath();
+        ctx.stroke();
+
+        // Add subtle top highlight for depth (very subtle to avoid banding)
+        const highlightGradient = ctx.createLinearGradient(tileX, tileY, tileX, tileY + scaledSize * 0.25);
+        highlightGradient.addColorStop(0, `hsla(${hue}, 100%, 70%, 0.15)`);
+        highlightGradient.addColorStop(0.5, `hsla(${hue}, 100%, 70%, 0.05)`);
+        highlightGradient.addColorStop(1, 'transparent');
+        ctx.fillStyle = highlightGradient;
+        ctx.beginPath();
+        ctx.moveTo(tileX + scaledRadius, tileY);
+        ctx.lineTo(tileX + scaledSize - scaledRadius, tileY);
+        ctx.quadraticCurveTo(tileX + scaledSize, tileY, tileX + scaledSize, tileY + scaledRadius);
+        ctx.lineTo(tileX + scaledSize, tileY + scaledSize * 0.3);
+        ctx.lineTo(tileX, tileY + scaledSize * 0.3);
+        ctx.lineTo(tileX, tileY + scaledRadius);
+        ctx.quadraticCurveTo(tileX, tileY, tileX + scaledRadius, tileY);
+        ctx.closePath();
+        ctx.fill();
 
         // Responsive font size - scale down for numbers with 6+ digits
         let fontSize = Math.max(16, Math.min(36, tileSize * 0.4));
@@ -2300,11 +2351,25 @@
           fontSize = fontSize * scaleFactor;
         }
         ctx.font = `bold ${fontSize}px "Share Tech Mono"`;
+        const textX = x + tileSize / 2;
+        const textY = y + tileSize / 2;
+        
+        // Raised/embossed bevel effect: Draw dark shadow on bottom-right (shadow cast by raised text)
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.fillText(tile.value, textX + 1, textY + 1);
+        
+        // Draw light highlight on top-left (light hitting raised surface)
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.fillText(tile.value, textX - 1, textY - 1);
+        
+        // Draw main text (raised on tile surface)
         ctx.fillStyle = '#00f5ff';
-        ctx.strokeStyle = '#000';
-        ctx.lineWidth = Math.max(1, fontSize / 18);
-        ctx.strokeText(tile.value, x + tileSize / 2, y + tileSize / 2);
-        ctx.fillText(tile.value, x + tileSize / 2, y + tileSize / 2);
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.lineWidth = Math.max(0.5, fontSize / 24);
+        ctx.strokeText(tile.value, textX, textY);
+        ctx.fillText(tile.value, textX, textY);
       });
 
       // Draw merge particle effects (only when animating - performance optimization)
