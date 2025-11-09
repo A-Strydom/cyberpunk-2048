@@ -756,7 +756,71 @@
       text-shadow: 0 0 6px rgba(255, 235, 59, 0.8);
       margin: 0 2px;
     }
-    #closeHelp {
+    #cheatModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(5px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      animation: fadeIn 0.3s ease;
+    }
+    #cheatModal.show {
+      display: flex;
+    }
+    #cheatInput {
+      width: 100%;
+      padding: 12px;
+      margin: 20px 0;
+      background: rgba(0, 0, 0, 0.5);
+      border: 2px solid #00f5ff;
+      border-radius: 4px;
+      color: #00f5ff;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 16px;
+      text-transform: uppercase;
+      text-shadow: 0 0 6px #00f5ff;
+      box-shadow: 0 0 10px rgba(0, 245, 255, 0.3);
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    #cheatInput:focus {
+      border-color: #ffeb3b;
+      box-shadow: 0 0 15px rgba(255, 235, 59, 0.5);
+      text-shadow: 0 0 8px #ffeb3b;
+    }
+    #cheatInput::placeholder {
+      color: rgba(0, 245, 255, 0.5);
+      text-transform: none;
+    }
+    .cheat-status {
+      min-height: 24px;
+      margin: 10px 0;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 14px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    .cheat-status.active {
+      color: #00ff00;
+      text-shadow: 0 0 8px #00ff00;
+    }
+    .cheat-status.invalid {
+      color: #ff0040;
+      text-shadow: 0 0 8px #ff0040;
+    }
+    .cheat-hint {
+      margin-top: 20px;
+      font-size: 14px;
+      color: rgba(0, 245, 255, 0.7);
+      font-style: italic;
+    }
+    #closeHelp, #closeCheat {
       position: absolute;
       top: 15px;
       right: 15px;
@@ -776,7 +840,7 @@
       align-items: center;
       justify-content: center;
     }
-    #closeHelp:hover {
+    #closeHelp:hover, #closeCheat:hover {
       background: rgba(0, 245, 255, 0.1);
       border-color: #ff0040;
       color: #ff0040;
@@ -1205,7 +1269,7 @@
     <div id="autodriveSpeedControl" class="autodrive-speed-control" style="display: none;">
       <div class="autodrive-header">
         <div class="autodrive-mode-label">AUTODRIVE MODE</div>
-        <button id="stopAutodrive" class="stop-autodrive-btn" title="Stop Autodrive">⏹</button>
+        <button id="stopAutodrive" class="stop-autodrive-btn" title="Stop Autodrive">■</button>
       </div>
       <label for="speedSlider">SPEED:</label>
       <div class="speed-slider-wrapper">
@@ -1219,6 +1283,7 @@
       <button id="menuToggle" title="Menu">☰</button>
       <div class="menu-dropdown" id="menuDropdown">
         <button id="soundBtn" title="Toggle Sound"></button>
+        <button id="cheatBtn" title="Cheat Codes">⚡ CHEAT</button>
         <button id="helpBtn" title="How to Play">? HELP</button>
       </div>
     </div>
@@ -1231,6 +1296,16 @@
           <option value="hard">HARD (3×3)</option>
         </select>
       </div>
+    </div>
+  </div>
+  <div id="cheatModal">
+    <div class="help-content">
+      <button id="closeCheat" title="Close">×</button>
+      <h2>CHEAT CODES</h2>
+      <p>Enter a cheat code to install new cyberware:</p>
+      <input type="text" id="cheatInput" placeholder="Type cheat code here..." autocomplete="off" />
+      <div id="cheatStatus" class="cheat-status"></div>
+      <p class="cheat-hint" id="cheatHint" style="display: none;">New cyberware installed: You can now click or tap any tile to double its value.</p>
     </div>
   </div>
   <div id="helpModal">
@@ -1707,6 +1782,9 @@
       // Stop any ongoing animations
       isAnimating = false;
       
+      // Reset cheat when game restarts
+      cheatActive = false;
+      
       // Initialize board first
       board = Array.from({ length: size }, () => Array(size).fill(0));
       tiles = [];
@@ -1973,8 +2051,22 @@
         fillRoundedRect(x + offset, y + offset, scaledSize, scaledSize, scaledRadius);
         ctx.shadowBlur = 0;
 
-        // Responsive font size
-        const fontSize = Math.max(16, Math.min(36, tileSize * 0.4));
+        // Responsive font size - scale down for numbers with 6+ digits
+        let fontSize = Math.max(16, Math.min(36, tileSize * 0.4));
+        const digitCount = tile.value.toString().length;
+        if (digitCount >= 6) {
+          // Scale down font size for 6+ digit numbers
+          // More aggressive scaling for 8+ digits to ensure space around edges
+          let scaleFactor;
+          if (digitCount >= 8) {
+            // For 8+ digits, use more aggressive scaling to ensure padding
+            scaleFactor = Math.min(0.65, 5.5 / digitCount);
+          } else {
+            // For 6-7 digits, moderate scaling
+            scaleFactor = Math.min(0.85, 5.5 / digitCount);
+          }
+          fontSize = fontSize * scaleFactor;
+        }
         ctx.font = `bold ${fontSize}px "Share Tech Mono"`;
         ctx.fillStyle = '#00f5ff';
         ctx.strokeStyle = '#000';
@@ -2575,6 +2667,12 @@
     }, { passive: false });
 
     document.addEventListener('touchend', (e) => {
+      // Skip swipe handling if cheat is active (cheat handler will handle it)
+      if (cheatActive) {
+        touchStartX = null;
+        touchStartY = null;
+        return;
+      }
       if (isInteractiveElement(e.target)) return;
       if (isAnimating || gameOver || autodriveActive || touchStartX === null || touchStartY === null) {
         touchStartX = null;
@@ -3206,6 +3304,165 @@
       });
     }
 
+    // Cheat functionality
+    let cheatActive = false;
+    const cheatBtn = document.getElementById('cheatBtn');
+    const cheatModal = document.getElementById('cheatModal');
+    const cheatInput = document.getElementById('cheatInput');
+    const cheatStatus = document.getElementById('cheatStatus');
+    const closeCheat = document.getElementById('closeCheat');
+
+    if (cheatBtn) {
+      cheatBtn.addEventListener('click', () => {
+        cheatModal.classList.add('show');
+        menuDropdown.classList.remove('show');
+        cheatInput.focus();
+      });
+    }
+
+    if (closeCheat) {
+      closeCheat.addEventListener('click', () => {
+        cheatModal.classList.remove('show');
+        // Don't reset cheatActive - keep it active so user can click tiles
+        // cheatActive stays true until game restarts or user explicitly disables
+      });
+    }
+
+    // Close cheat modal when clicking outside
+    if (cheatModal) {
+      cheatModal.addEventListener('click', (e) => {
+        if (e.target === cheatModal) {
+          cheatModal.classList.remove('show');
+          // Don't reset cheatActive - keep it active so user can click tiles
+          // cheatActive stays true until game restarts or user explicitly disables
+        }
+      });
+    }
+
+    // Validate cheat code
+    const cheatHint = document.getElementById('cheatHint');
+    if (cheatInput) {
+      cheatInput.addEventListener('input', (e) => {
+        const code = e.target.value.trim().toLowerCase();
+        if (code === 'netrunner') {
+          cheatActive = true;
+          cheatStatus.textContent = '✓ CHEAT ACTIVATED';
+          cheatStatus.className = 'cheat-status active';
+          if (cheatHint) cheatHint.style.display = 'block';
+        } else if (code.length > 0) {
+          cheatActive = false;
+          cheatStatus.textContent = '✗ INVALID CODE';
+          cheatStatus.className = 'cheat-status invalid';
+          if (cheatHint) cheatHint.style.display = 'none';
+        } else {
+          cheatActive = false;
+          cheatStatus.textContent = '';
+          cheatStatus.className = 'cheat-status';
+          if (cheatHint) cheatHint.style.display = 'none';
+        }
+      });
+
+      // Allow Enter key to activate
+      cheatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          const code = e.target.value.trim().toLowerCase();
+          if (code === 'netrunner') {
+            cheatActive = true;
+            cheatStatus.textContent = '✓ CHEAT ACTIVATED';
+            cheatStatus.className = 'cheat-status active';
+            if (cheatHint) cheatHint.style.display = 'block';
+          }
+        } else if (e.key === 'Escape') {
+          cheatModal.classList.remove('show');
+          // Don't reset cheatActive - keep it active so user can click tiles
+        }
+      });
+    }
+
+    // Handle tile clicks when cheat is active
+    function handleTileClick(e) {
+      if (!cheatActive) return;
+      if (gameOver || isAnimating) return;
+
+      // Prevent default to avoid conflicts with swipe handlers
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Get click coordinates relative to canvas (in logical pixels, not physical)
+      const rect = canvas.getBoundingClientRect();
+      
+      let clientX, clientY;
+      // Handle touch events
+      if (e.changedTouches && e.changedTouches.length > 0) {
+        clientX = e.changedTouches[0].clientX;
+        clientY = e.changedTouches[0].clientY;
+      } else if (e.touches && e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
+
+      // Convert to logical coordinates (canvas.style.width/height, not canvas.width/height)
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+
+      // Calculate which tile was clicked using logical coordinates
+      const clickedCol = Math.floor((x - gap) / (tileSize + gap));
+      const clickedRow = Math.floor((y - gap) / (tileSize + gap));
+
+      // Validate tile coordinates and ensure we're clicking on a valid tile
+      if (clickedRow >= 0 && clickedRow < size && clickedCol >= 0 && clickedCol < size) {
+        const tileValue = board[clickedRow][clickedCol];
+        if (tileValue > 0) {
+          // Double the tile value
+          board[clickedRow][clickedCol] = tileValue * 2;
+          
+          // Update tiles array
+          syncTilesFromBoard();
+          
+          // Update score
+          score += tileValue * 2;
+          updateScores();
+          
+          // Redraw board
+          drawBoard();
+          
+          // Play sound
+          SoundManager.playMerge(tileValue * 2);
+        }
+      }
+    }
+
+    // Add click and touch listeners to canvas
+    if (canvas) {
+      // Use capture phase and higher priority to catch before swipe handlers
+      canvas.addEventListener('click', (e) => {
+        if (cheatActive) {
+          handleTileClick(e);
+        }
+      }, true);
+      
+      canvas.addEventListener('touchend', (e) => {
+        if (cheatActive) {
+          // Only handle if it's a tap (not a swipe)
+          if (touchStartX !== null && touchStartY !== null) {
+            const touch = e.changedTouches[0];
+            const deltaX = Math.abs(touch.clientX - touchStartX);
+            const deltaY = Math.abs(touch.clientY - touchStartY);
+            // If it's a small movement (tap), handle as cheat click
+            if (deltaX < 10 && deltaY < 10) {
+              handleTileClick(e);
+            }
+          } else {
+            // No touchstart recorded, treat as tap
+            handleTileClick(e);
+          }
+        }
+      }, { passive: false, capture: true });
+    }
+
     // Help modal functionality
     const helpBtn = document.getElementById('helpBtn');
     const helpModal = document.getElementById('helpModal');
@@ -3229,10 +3486,16 @@
       }
     });
 
-    // Close modal with Escape key
+    // Close modals with Escape key
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && helpModal.classList.contains('show')) {
-        helpModal.classList.remove('show');
+      if (e.key === 'Escape') {
+        if (helpModal.classList.contains('show')) {
+          helpModal.classList.remove('show');
+        }
+        if (cheatModal && cheatModal.classList.contains('show')) {
+          cheatModal.classList.remove('show');
+          // Don't reset cheatActive - keep it active so user can click tiles
+        }
       }
     });
 
