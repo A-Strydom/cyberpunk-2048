@@ -16,7 +16,8 @@ A cyberpunk-themed implementation of the classic 2048 puzzle game with stunning 
 - 🤖 **Intelligent Autodrive Mode**: Advanced AI with bottom-left corner strategy and smart decision-making
 - ⚡ **Autodrive Speed Control**: Adjustable speed from 0.5x to 5x with smooth slider control
 - 🎚️ **Difficulty Levels**: Easy (4x4), Normal (5x5), and Hard (6x6) modes with dynamic spawn probabilities
-- 🎲 **Cheat Codes**: Multiple cheat codes available (NETRUNNER, FLATLINE) with special abilities
+- 🎲 **Cheat Codes**: Multiple cheat codes available (NETRUNNER, FLATLINE, TRACEBACK) with special abilities
+- ⏪ **Undo/Redo System**: Undo and redo moves with TRACEBACK cheat code, works with autodrive mode
 - 🎨 **Material Icons**: Modern Material Design icons throughout the interface for a polished look
 - 🗑️ **Clear High Score**: Reset your high score with a confirmation modal
 - 🎨 **Enhanced Tile Visuals**: Gradient depth effects, border glow, and top highlights for 3D appearance
@@ -36,16 +37,18 @@ A cyberpunk-themed implementation of the classic 2048 puzzle game with stunning 
 4. Click **REBOOT** to restart the game (reloads page to fetch latest version)
 5. Click **Autodrive** to watch the AI play automatically
 6. **Sound toggle** (♪ icon): Click the sound icon next to the menu to enable/disable sounds
-7. Open the **menu** (☰) to access:
+7. **Undo/Redo** (⏪ ⏩ icons): Available when TRACEBACK cheat is activated - undo or redo your moves
+8. Open the **menu** (☰) to access:
    - **Clear High Score**: Reset your high score (with confirmation)
    - **Difficulty**: Select Easy (4x4), Normal (5x5), or Hard (6x6) from the modal
-   - **Cheat**: Enter cheat codes to activate special abilities
+   - **Cheat**: Enter cheat codes to activate special abilities (NETRUNNER, FLATLINE, TRACEBACK)
    - **Help**: View game instructions
-8. Control **Autodrive speed** with the slider (0.5x - 5x) when Autodrive is active
-9. Double-click/tap the speed value (e.g., "1x") to reset to normal speed
-10. Press **Escape** key to close any open modal
-11. Click/tap anywhere outside modals to close them
-12. The game automatically redraws tiles when the window is resized
+9. Control **Autodrive speed** with the slider (0.5x - 5x) when Autodrive is active
+10. Double-click/tap the speed value (e.g., "1x") to reset to normal speed
+11. Press **Escape** key to close any open modal
+12. Click/tap anywhere outside modals to close them
+13. The game automatically redraws tiles when the window is resized
+14. When **TRACEBACK** is active and the game is about to end, choose "TRACEBACK" to undo or "ACCEPT FATE" to proceed to game over
 
 ## 🚀 Getting Started
 
@@ -105,6 +108,15 @@ Activate special abilities by entering cheat codes in the cheat menu:
   - Click the button to immediately end the game (trigger game over)
   - Useful for testing the game over screen or ending a game quickly
 
+- **TRACEBACK**: Enter this code to activate the undo/redo system
+  - Undo and redo buttons (⏪ ⏩) will appear next to the sound icon
+  - Click undo to revert your last move, or redo to restore a move you undid
+  - Works with both manual moves and autodrive mode
+  - When the game is about to end (flatline), a modal will appear asking if you want to "TRACEBACK" (undo) or "ACCEPT FATE" (proceed to game over)
+  - If you choose TRACEBACK during autodrive, autodrive will automatically turn off
+  - Perfect for experimenting with different strategies and learning optimal moves
+  - Undo stack is limited to the last 50 moves to prevent memory issues
+
 Access the cheat menu from the main menu (☰) → **⌨️ CHEAT**.
 
 ## 🤖 Autodrive Mode
@@ -156,6 +168,8 @@ The game uses CSS custom properties and can be easily customized by modifying th
 - **Canvas Resize Handling**: Automatic tile redraw on window resize and orientation change
 - **Modal System**: Custom-styled modals with backdrop blur and smooth animations
 - **Confirmation Dialogs**: Custom confirmation modals matching the cyberpunk theme
+- **Undo/Redo System**: State management with undo/redo stacks, works seamlessly with autodrive mode
+- **State Persistence**: Game states are saved before each move for undo functionality (limited to 50 moves)
 
 ## 📝 License
 
@@ -181,7 +195,6 @@ cyberpunk-2048/
 
 ## 🎯 Future Enhancements
 
-- [ ] **Undo/Redo System**: Allow players to undo moves and experiment with different strategies
 - [ ] **Achievement System**: Unlock achievements for milestones (reach 512, 1024, 2048, etc.)
 - [ ] **Statistics Tracking**: Track total games played, best streak, average score, and move count
 - [ ] **Replay System**: Save and replay your best games move-by-move

@@ -779,7 +779,7 @@
       text-shadow: 0 0 6px rgba(255, 235, 59, 0.8);
       margin: 0 2px;
     }
-    #difficultyModal, #cheatModal, #confirmModal {
+    #difficultyModal, #cheatModal, #confirmModal, #tracebackModal {
       position: fixed;
       top: 0;
       left: 0;
@@ -793,7 +793,7 @@
       z-index: 1000;
       animation: fadeIn 0.3s ease;
     }
-    #difficultyModal.show, #cheatModal.show, #confirmModal.show {
+    #difficultyModal.show, #cheatModal.show, #confirmModal.show, #tracebackModal.show {
       display: flex;
     }
     .difficulty-options {
@@ -1059,6 +1059,40 @@
     #soundBtn.muted {
       opacity: 0.5;
     }
+    #undoBtn, #redoBtn {
+      background: transparent;
+      color: #00f5ff;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 28px;
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      cursor: pointer;
+      text-shadow: 0 0 6px #00f5ff;
+      transition: text-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+      border: none;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      margin-left: 8px;
+    }
+    #undoBtn .material-icons, #redoBtn .material-icons {
+      font-family: 'Material Icons';
+      font-size: 28px;
+      color: inherit;
+      line-height: 1;
+      display: inline-block;
+    }
+    #undoBtn:hover, #redoBtn:hover {
+      text-shadow: 0 0 10px #00f5ff;
+      transform: scale(1.1);
+    }
+    #undoBtn:disabled, #redoBtn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
     .menu-dropdown {
       position: absolute;
       bottom: 38px;
@@ -1191,6 +1225,16 @@
       }
 
       #soundBtn .material-icons {
+        font-size: 24px;
+      }
+
+      #undoBtn, #redoBtn {
+        font-size: 24px;
+        width: 36px;
+        height: 36px;
+      }
+
+      #undoBtn .material-icons, #redoBtn .material-icons {
         font-size: 24px;
       }
 
@@ -1397,6 +1441,16 @@
         font-size: 24px;
       }
 
+      #undoBtn, #redoBtn {
+        font-size: 24px;
+        width: 36px;
+        height: 36px;
+      }
+
+      #undoBtn .material-icons, #redoBtn .material-icons {
+        font-size: 24px;
+      }
+
       .menu-dropdown {
         bottom: 36px;
         min-width: 160px;
@@ -1511,6 +1565,8 @@
     <div class="title-menu">
       <button id="menuToggle" title="Menu">☰</button>
       <button id="soundBtn" title="Toggle Sound"><span class="material-icons">volume_up</span></button>
+      <button id="undoBtn" title="Undo" style="display: none;"><span class="material-icons">undo</span></button>
+      <button id="redoBtn" title="Redo" style="display: none;"><span class="material-icons">redo</span></button>
       <div class="menu-dropdown" id="menuDropdown">
         <button id="clearHighScoreBtn" title="Clear High Score"><span class="material-icons">do_not_disturb</span> CLEAR HIGH SCORE</button>
         <button id="difficultyBtn" title="Difficulty"><span class="material-icons">settings</span> DIFFICULTY</button>
@@ -1597,6 +1653,16 @@
       <div class="confirm-buttons">
         <button id="confirmYes" class="confirm-btn">YES</button>
         <button id="confirmNo" class="confirm-btn">NO - ONE MORE GIG</button>
+      </div>
+    </div>
+  </div>
+  <div id="tracebackModal">
+    <div class="help-content">
+      <h2>FLATLINE DETECTED</h2>
+      <p>You are about to flatline. Choose your path:</p>
+      <div class="confirm-buttons">
+        <button id="tracebackBtn" class="confirm-btn">TRACEBACK</button>
+        <button id="acceptFateBtn" class="confirm-btn">ACCEPT FATE</button>
       </div>
     </div>
   </div>
@@ -2059,12 +2125,18 @@
       // Reset cheat when game restarts
       cheatActive = false;
       flatlineActive = false;
+      tracebackActive = false;
+      undoStack = [];
+      redoStack = [];
       if (flatlineBtn) flatlineBtn.style.display = 'none';
+      if (undoBtn) undoBtn.style.display = 'none';
+      if (redoBtn) redoBtn.style.display = 'none';
       if (cheatStatus) {
         cheatStatus.textContent = '';
         cheatStatus.className = 'cheat-status';
       }
       if (cheatHint) cheatHint.style.display = 'none';
+      updateUndoRedoButtons();
       
       // Initialize board first
       board = Array.from({ length: size }, () => Array(size).fill(0));
@@ -2112,6 +2184,29 @@
     }
 
     function showGameOver() {
+      // If traceback is active, show traceback modal instead
+      if (tracebackActive && undoStack.length > 0) {
+        const tracebackModal = document.getElementById('tracebackModal');
+        if (tracebackModal) {
+          // Stop autodrive when showing traceback modal
+          if (autodriveActive) {
+            autodriveActive = false;
+            if (autodriveTimeout) {
+              clearTimeout(autodriveTimeout);
+              autodriveTimeout = null;
+            }
+            autodriveBtn.classList.remove('active');
+            updateAutodriveButtonText('Autodrive');
+            const speedControl = document.getElementById('autodriveSpeedControl');
+            if (autodriveBtn) autodriveBtn.style.display = 'flex';
+            if (speedControl) speedControl.style.display = 'none';
+          }
+          tracebackModal.classList.add('show');
+          return; // Don't show game over yet
+        }
+      }
+      
+      // Normal game over flow
       gameOver = true;
       finalScoreEl.textContent = score;
       gameOverEl.classList.add('show');
@@ -2934,6 +3029,9 @@
       
       if (isAnimating || gameOver || autodriveActive) return; // Prevent moves during animation, when game is over, or when autodrive is active
       
+      // Save game state before move (for undo/redo) - we'll remove it if move is invalid
+      saveGameState();
+      
       const oldBoard = JSON.stringify(board);
       switch (e.key) {
         case 'ArrowLeft': moveLeft(); break;
@@ -2978,6 +3076,11 @@
         };
         requestAnimationFrame(checkAndAddTile);
       } else {
+        // Invalid move - board didn't change, remove the state we just saved
+        if (tracebackActive && undoStack.length > 0) {
+          undoStack.pop();
+          updateUndoRedoButtons();
+        }
         // Invalid move - board didn't change
         SoundManager.playInvalidMove();
       }
@@ -3040,6 +3143,9 @@
       const absDeltaY = Math.abs(deltaY);
       
       if (absDeltaX > minSwipeDistance || absDeltaY > minSwipeDistance) {
+        // Save game state before move (for undo/redo) - we'll remove it if move is invalid
+        saveGameState();
+        
         const oldBoard = JSON.stringify(board);
         if (absDeltaX > absDeltaY) {
           if (deltaX > 0) {
@@ -3088,6 +3194,11 @@
           };
           requestAnimationFrame(checkAndAddTile);
         } else {
+          // Invalid move - board didn't change, remove the state we just saved
+          if (tracebackActive && undoStack.length > 0) {
+            undoStack.pop();
+            updateUndoRedoButtons();
+          }
           // Invalid move - board didn't change
           SoundManager.playInvalidMove();
         }
@@ -3352,6 +3463,9 @@
 
       const bestMove = getBestMove();
       if (bestMove) {
+        // Save game state before move (for undo/redo) - we'll remove it if move is invalid
+        saveGameState();
+        
         // Save board state before move
         const oldBoard = JSON.stringify(board);
         
@@ -3409,6 +3523,11 @@
           };
           requestAnimationFrame(checkAndAddTile);
         } else {
+          // Board didn't change, remove the state we just saved
+          if (tracebackActive && undoStack.length > 0) {
+            undoStack.pop();
+            updateUndoRedoButtons();
+          }
           // Board didn't change, try next move with reduced delay
           const delay = Math.max(50, Math.round(baseAutodriveDelay / autodriveSpeedMultiplier / 3));
           autodriveTimeout = setTimeout(() => {
@@ -3583,6 +3702,8 @@
         cheatStatus.className = 'cheat-status';
       }
       if (flatlineBtn) flatlineBtn.style.display = 'none';
+      if (undoBtn) undoBtn.style.display = 'none';
+      if (redoBtn) redoBtn.style.display = 'none';
       
       // Reload the page to get latest version (high scores persist in localStorage)
       // Delay slightly to let animations play
@@ -3605,6 +3726,8 @@
         cheatStatus.className = 'cheat-status';
       }
       if (flatlineBtn) flatlineBtn.style.display = 'none';
+      if (undoBtn) undoBtn.style.display = 'none';
+      if (redoBtn) redoBtn.style.display = 'none';
       initGame();
     });
     autodriveBtn.addEventListener('click', toggleAutodrive);
@@ -3744,12 +3867,113 @@
     // Cheat functionality
     let cheatActive = false;
     let flatlineActive = false;
+    let tracebackActive = false;
     const cheatBtn = document.getElementById('cheatBtn');
     const cheatModal = document.getElementById('cheatModal');
     const cheatInput = document.getElementById('cheatInput');
     const cheatStatus = document.getElementById('cheatStatus');
     const closeCheat = document.getElementById('closeCheat');
     const flatlineBtn = document.getElementById('flatlineBtn');
+    
+    // Undo/Redo state management
+    let undoStack = [];
+    let redoStack = [];
+    const undoBtn = document.getElementById('undoBtn');
+    const redoBtn = document.getElementById('redoBtn');
+    
+    function saveGameState() {
+      if (tracebackActive) {
+        undoStack.push({
+          board: JSON.parse(JSON.stringify(board)),
+          score: score,
+          tiles: JSON.parse(JSON.stringify(tiles))
+        });
+        // Limit undo stack to prevent memory issues (keep last 50 moves)
+        if (undoStack.length > 50) {
+          undoStack.shift();
+        }
+        // Clear redo stack when new move is made
+        redoStack = [];
+        updateUndoRedoButtons();
+      }
+    }
+    
+    function restoreGameState(state) {
+      board = JSON.parse(JSON.stringify(state.board));
+      score = state.score;
+      tiles = JSON.parse(JSON.stringify(state.tiles));
+      syncTilesFromBoard();
+      updateScores();
+      drawBoard();
+      updateUndoRedoButtons();
+    }
+    
+    function updateUndoRedoButtons() {
+      if (undoBtn) {
+        undoBtn.disabled = undoStack.length === 0 || isAnimating || gameOver;
+      }
+      if (redoBtn) {
+        redoBtn.disabled = redoStack.length === 0 || isAnimating || gameOver;
+      }
+    }
+    
+    function undoMove() {
+      if (undoStack.length === 0 || isAnimating || gameOver) return;
+      
+      // Turn off autodrive if it's active (user is manually undoing)
+      if (autodriveActive) {
+        autodriveActive = false;
+        if (autodriveTimeout) {
+          clearTimeout(autodriveTimeout);
+          autodriveTimeout = null;
+        }
+        autodriveBtn.classList.remove('active');
+        updateAutodriveButtonText('Autodrive');
+        const speedControl = document.getElementById('autodriveSpeedControl');
+        if (autodriveBtn) autodriveBtn.style.display = 'flex';
+        if (speedControl) speedControl.style.display = 'none';
+      }
+      
+      // Save current state to redo stack
+      redoStack.push({
+        board: JSON.parse(JSON.stringify(board)),
+        score: score,
+        tiles: JSON.parse(JSON.stringify(tiles))
+      });
+      
+      // Restore previous state
+      const previousState = undoStack.pop();
+      restoreGameState(previousState);
+    }
+    
+    function redoMove() {
+      if (redoStack.length === 0 || isAnimating || gameOver) return;
+      
+      // Turn off autodrive if it's active (user is manually redoing)
+      if (autodriveActive) {
+        autodriveActive = false;
+        if (autodriveTimeout) {
+          clearTimeout(autodriveTimeout);
+          autodriveTimeout = null;
+        }
+        autodriveBtn.classList.remove('active');
+        updateAutodriveButtonText('Autodrive');
+        const speedControl = document.getElementById('autodriveSpeedControl');
+        if (autodriveBtn) autodriveBtn.style.display = 'flex';
+        if (speedControl) speedControl.style.display = 'none';
+      }
+      
+      // Save current state to undo stack
+      undoStack.push({
+        board: JSON.parse(JSON.stringify(board)),
+        score: score,
+        tiles: JSON.parse(JSON.stringify(tiles))
+      });
+      
+      // Restore next state
+      const nextState = redoStack.pop();
+      restoreGameState(nextState);
+    }
 
     if (cheatBtn) {
       cheatBtn.addEventListener('click', () => {
@@ -3794,26 +4018,57 @@
           // Activate flatline cheat
           cheatActive = false;
           flatlineActive = true;
+          tracebackActive = false;
           cheatStatus.textContent = '⚡ FLATLINE ACTIVATED';
           cheatStatus.className = 'cheat-status active';
           if (cheatHint) cheatHint.style.display = 'none';
           if (flatlineBtn) flatlineBtn.style.display = 'flex';
+          if (undoBtn) undoBtn.style.display = 'none';
+          if (redoBtn) redoBtn.style.display = 'none';
+          undoStack = [];
+          redoStack = [];
+          // Clear cheat input
+          if (cheatInput) cheatInput.value = '';
+        } else if (code === 'traceback') {
+          // Activate traceback cheat (undo/redo)
+          cheatActive = false;
+          flatlineActive = false;
+          tracebackActive = true;
+          cheatStatus.textContent = '✓ TRACEBACK ACTIVATED';
+          cheatStatus.className = 'cheat-status active';
+          if (cheatHint) cheatHint.style.display = 'none';
+          if (flatlineBtn) flatlineBtn.style.display = 'none';
+          if (undoBtn) undoBtn.style.display = 'flex';
+          if (redoBtn) redoBtn.style.display = 'flex';
+          undoStack = [];
+          redoStack = [];
+          updateUndoRedoButtons();
           // Clear cheat input
           if (cheatInput) cheatInput.value = '';
         } else if (code.length > 0) {
           cheatActive = false;
           flatlineActive = false;
+          tracebackActive = false;
           cheatStatus.textContent = '✗ INVALID CODE';
           cheatStatus.className = 'cheat-status invalid';
           if (cheatHint) cheatHint.style.display = 'none';
           if (flatlineBtn) flatlineBtn.style.display = 'none';
+          if (undoBtn) undoBtn.style.display = 'none';
+          if (redoBtn) redoBtn.style.display = 'none';
+          undoStack = [];
+          redoStack = [];
         } else {
           cheatActive = false;
           flatlineActive = false;
+          tracebackActive = false;
           cheatStatus.textContent = '';
           cheatStatus.className = 'cheat-status';
           if (cheatHint) cheatHint.style.display = 'none';
           if (flatlineBtn) flatlineBtn.style.display = 'none';
+          if (undoBtn) undoBtn.style.display = 'none';
+          if (redoBtn) redoBtn.style.display = 'none';
+          undoStack = [];
+          redoStack = [];
         }
       });
 
@@ -3852,6 +4107,61 @@
         if (!gameOver && flatlineActive) {
           showGameOver();
           if (cheatModal) cheatModal.classList.remove('show');
+        }
+      });
+    }
+    
+    // Undo/Redo button handlers
+    if (undoBtn) {
+      undoBtn.addEventListener('click', () => {
+        undoMove();
+      });
+    }
+    
+    if (redoBtn) {
+      redoBtn.addEventListener('click', () => {
+        redoMove();
+      });
+    }
+    
+    // Traceback modal handlers
+    const tracebackModal = document.getElementById('tracebackModal');
+    const tracebackBtn = document.getElementById('tracebackBtn');
+    const acceptFateBtn = document.getElementById('acceptFateBtn');
+    
+    if (tracebackBtn) {
+      tracebackBtn.addEventListener('click', () => {
+        if (tracebackModal) tracebackModal.classList.remove('show');
+        undoMove();
+      });
+    }
+    
+    if (acceptFateBtn) {
+      acceptFateBtn.addEventListener('click', () => {
+        if (tracebackModal) tracebackModal.classList.remove('show');
+        // Show actual game over
+        gameOver = true;
+        finalScoreEl.textContent = score;
+        gameOverEl.classList.add('show');
+        SoundManager.playGameOver();
+        // Stop autodrive when game ends
+        if (autodriveActive) {
+          autodriveActive = false;
+          if (autodriveTimeout) {
+            clearTimeout(autodriveTimeout);
+            autodriveTimeout = null;
+          }
+          autodriveBtn.classList.remove('active');
+          updateAutodriveButtonText('Autodrive');
+        }
+      });
+    }
+    
+    // Close traceback modal when clicking outside
+    if (tracebackModal) {
+      tracebackModal.addEventListener('click', (e) => {
+        if (e.target === tracebackModal) {
+          tracebackModal.classList.remove('show');
         }
       });
     }
@@ -3978,6 +4288,9 @@
         }
         if (confirmModal && confirmModal.classList.contains('show')) {
           confirmModal.classList.remove('show');
+        }
+        if (tracebackModal && tracebackModal.classList.contains('show')) {
+          tracebackModal.classList.remove('show');
         }
       }
     });
