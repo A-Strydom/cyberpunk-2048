@@ -554,6 +554,116 @@
     #autodrive.active::before {
       background: #00f5ff;
     }
+    .autodrive-speed-control {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 10px 15px;
+      background: rgba(10, 10, 30, 0.95);
+      border: 1px solid #00f5ff;
+      border-radius: 6px;
+      box-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
+      min-width: 200px;
+      position: relative;
+    }
+    .autodrive-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+    .stop-autodrive-btn {
+      background: rgba(10, 10, 30, 0.9);
+      color: #ff6b35;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 16px;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border: 1px solid #ff6b35;
+      border-radius: 4px;
+      cursor: pointer;
+      text-shadow: 0 0 6px #ff6b35;
+      box-shadow: 0 0 8px rgba(255, 107, 53, 0.5);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .stop-autodrive-btn:hover {
+      background: rgba(255, 107, 53, 0.2);
+      box-shadow: 0 0 12px rgba(255, 107, 53, 0.8);
+      text-shadow: 0 0 10px #ff6b35;
+    }
+    .autodrive-mode-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      color: #00f5ff;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-shadow: 0 0 8px #00f5ff;
+      font-weight: bold;
+    }
+    .autodrive-speed-control label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: rgba(0, 245, 255, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .speed-slider-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #speedSlider {
+      flex: 1;
+      height: 4px;
+      background: rgba(0, 245, 255, 0.2);
+      border-radius: 2px;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    #speedSlider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      background: #00f5ff;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(0, 245, 255, 0.8);
+      transition: all 0.2s ease;
+    }
+    #speedSlider::-webkit-slider-thumb:hover {
+      background: #ff6b35;
+      box-shadow: 0 0 12px rgba(255, 107, 53, 0.8);
+    }
+    #speedSlider::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      background: #00f5ff;
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 0 8px rgba(0, 245, 255, 0.8);
+      transition: all 0.2s ease;
+    }
+    #speedSlider::-moz-range-thumb:hover {
+      background: #ff6b35;
+      box-shadow: 0 0 12px rgba(255, 107, 53, 0.8);
+    }
+    #speedValue {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: #00f5ff;
+      text-shadow: 0 0 6px #00f5ff;
+      min-width: 50px;
+      text-align: right;
+    }
     #helpModal {
       position: fixed;
       top: 0;
@@ -857,6 +967,37 @@
         white-space: nowrap;
       }
 
+      .autodrive-speed-control {
+        min-width: 200px;
+        padding: 8px 12px;
+      }
+
+      .autodrive-mode-label {
+        font-size: 10px;
+        letter-spacing: 1px;
+      }
+
+      .stop-autodrive-btn {
+        width: 26px;
+        height: 26px;
+        font-size: 14px;
+      }
+
+      .autodrive-speed-control label {
+        font-size: 10px;
+      }
+
+      #speedValue {
+        font-size: 10px;
+        min-width: 45px;
+      }
+
+      .stop-autodrive-btn {
+        width: 26px;
+        height: 26px;
+        font-size: 14px;
+      }
+
       .bottom-left-controls {
         bottom: 15px;
         left: 15px;
@@ -1061,6 +1202,17 @@
   <div class="top-right-controls">
     <button id="restart" title="Restart">REBOOT</button>
     <button id="autodrive">Autodrive</button>
+    <div id="autodriveSpeedControl" class="autodrive-speed-control" style="display: none;">
+      <div class="autodrive-header">
+        <div class="autodrive-mode-label">AUTODRIVE MODE</div>
+        <button id="stopAutodrive" class="stop-autodrive-btn" title="Stop Autodrive">⏹</button>
+      </div>
+      <label for="speedSlider">SPEED:</label>
+      <div class="speed-slider-wrapper">
+        <input type="range" id="speedSlider" min="0.5" max="5" value="1" step="0.25">
+        <span id="speedValue">1x</span>
+      </div>
+    </div>
   </div>
   <div class="bottom-left-controls">
     <div class="title-menu">
@@ -1223,6 +1375,8 @@
     let gameOver = false;
     let autodriveActive = false;
     let autodriveTimeout = null;
+    let autodriveSpeedMultiplier = 1; // Default speed multiplier (1x = normal)
+    const baseAutodriveDelay = 300; // Base delay in milliseconds for 1x speed
 
     // Sound Manager
     const SoundManager = {
@@ -2434,27 +2588,34 @@
     function evaluateMove(direction) {
       // Simulate the move to see the result
       const testBoard = board.map(row => [...row]);
-      let testScore = score;
+      let mergeCount = 0;
       let emptyCount = 0;
       let maxTile = 0;
-      let cornerBonus = 0;
+      let maxTileRow = -1;
+      let maxTileCol = -1;
+      let cornerValue = 0;
+      let monotonicBonus = 0;
+      let gameOverPenalty = 0;
 
-      // Simulate move
+      // Simulate move and count merges
       if (direction === 'left') {
         for (let i = 0; i < size; i++) {
           const result = move(testBoard[i], i, 'left');
           testBoard[i] = result.row;
+          mergeCount += result.merged.length;
         }
       } else if (direction === 'right') {
         for (let i = 0; i < size; i++) {
           const result = move([...testBoard[i]].reverse(), i, 'right');
           testBoard[i] = result.row.reverse();
+          mergeCount += result.merged.length;
         }
       } else if (direction === 'up') {
         const rotated = rotateBoardCounterClockwiseFrom(testBoard);
         for (let i = 0; i < size; i++) {
           const result = move(rotated[i], i, 'left');
           rotated[i] = result.row;
+          mergeCount += result.merged.length;
         }
         for (let i = 0; i < size; i++) {
           for (let j = 0; j < size; j++) {
@@ -2466,6 +2627,7 @@
         for (let i = 0; i < size; i++) {
           const result = move(rotated[i], i, 'left');
           rotated[i] = result.row;
+          mergeCount += result.merged.length;
         }
         for (let i = 0; i < size; i++) {
           for (let j = 0; j < size; j++) {
@@ -2474,26 +2636,138 @@
         }
       }
 
-      // Count empty cells and find max tile
+      // Analyze the resulting board
       for (let i = 0; i < size; i++) {
         for (let j = 0; j < size; j++) {
-          if (testBoard[i][j] === 0) emptyCount++;
-          if (testBoard[i][j] > maxTile) maxTile = testBoard[i][j];
-          // Bonus for keeping high tiles in bottom-left corner
-          if (i === size - 1 && j === 0 && testBoard[i][j] > 0) {
-            cornerBonus += testBoard[i][j] * 10;
+          const value = testBoard[i][j];
+          if (value === 0) {
+            emptyCount++;
+          } else {
+            if (value > maxTile) {
+              maxTile = value;
+              maxTileRow = i;
+              maxTileCol = j;
+            }
+            // Strong bonus for highest tile in bottom-left corner
+            if (i === size - 1 && j === 0) {
+              cornerValue = value;
+              if (value === maxTile) {
+                cornerValue *= 20; // Extra bonus if it's the max tile
+              }
+            }
           }
         }
       }
 
-      // Prefer moves that keep the corner pattern (down or left)
-      let directionBonus = 0;
-      if (direction === 'down' || direction === 'left') {
-        directionBonus = 50;
+      // Check if this move leads to game over (no available moves after)
+      let hasMovesAfter = false;
+      const testMoves = ['up', 'down', 'left', 'right'];
+      for (const testDir of testMoves) {
+        const testBoard2 = testBoard.map(row => [...row]);
+        let changed = false;
+        if (testDir === 'left') {
+          for (let i = 0; i < size; i++) {
+            const oldRow = JSON.stringify(testBoard2[i]);
+            const result = move(testBoard2[i], i, 'left');
+            testBoard2[i] = result.row;
+            if (JSON.stringify(testBoard2[i]) !== oldRow) changed = true;
+          }
+        } else if (testDir === 'right') {
+          for (let i = 0; i < size; i++) {
+            const oldRow = JSON.stringify(testBoard2[i]);
+            const result = move([...testBoard2[i]].reverse(), i, 'right');
+            testBoard2[i] = result.row.reverse();
+            if (JSON.stringify(testBoard2[i]) !== oldRow) changed = true;
+          }
+        } else if (testDir === 'up') {
+          const rotated = rotateBoardCounterClockwiseFrom(testBoard2);
+          for (let i = 0; i < size; i++) {
+            const result = move(rotated[i], i, 'left');
+            rotated[i] = result.row;
+          }
+          const newBoard = Array.from({ length: size }, () => Array(size).fill(0));
+          for (let i = 0; i < size; i++) {
+            for (let j = 0; j < size; j++) {
+              newBoard[j][size - 1 - i] = rotated[i][j];
+            }
+          }
+          if (JSON.stringify(newBoard) !== JSON.stringify(testBoard2)) changed = true;
+        } else if (testDir === 'down') {
+          const rotated = rotateBoardClockwiseFrom(testBoard2);
+          for (let i = 0; i < size; i++) {
+            const result = move(rotated[i], i, 'left');
+            rotated[i] = result.row;
+          }
+          const newBoard = Array.from({ length: size }, () => Array(size).fill(0));
+          for (let i = 0; i < size; i++) {
+            for (let j = 0; j < size; j++) {
+              newBoard[size - 1 - j][i] = rotated[i][j];
+            }
+          }
+          if (JSON.stringify(newBoard) !== JSON.stringify(testBoard2)) changed = true;
+        }
+        if (changed) {
+          hasMovesAfter = true;
+          break;
+        }
+      }
+      if (!hasMovesAfter && emptyCount === 0) {
+        gameOverPenalty = -10000; // Heavy penalty for moves that cause game over
       }
 
-      // Calculate score: empty cells are good, merges are good, corner strategy is good
-      return emptyCount * 10 + maxTile * 5 + cornerBonus + directionBonus;
+      // Monotonic bonus: prefer decreasing values from bottom-left to top-right
+      // Check bottom row (left to right should be decreasing or equal)
+      let bottomRowMonotonic = true;
+      for (let j = 0; j < size - 1; j++) {
+        const left = testBoard[size - 1][j];
+        const right = testBoard[size - 1][j + 1];
+        if (left > 0 && right > 0 && left < right) {
+          bottomRowMonotonic = false;
+          break;
+        }
+      }
+      // Check left column (bottom to top should be decreasing or equal)
+      let leftColMonotonic = true;
+      for (let i = size - 1; i > 0; i--) {
+        const bottom = testBoard[i][0];
+        const top = testBoard[i - 1][0];
+        if (bottom > 0 && top > 0 && bottom < top) {
+          leftColMonotonic = false;
+          break;
+        }
+      }
+      if (bottomRowMonotonic) monotonicBonus += 100;
+      if (leftColMonotonic) monotonicBonus += 100;
+
+      // Penalty if max tile is not in bottom-left corner
+      let cornerPenalty = 0;
+      if (maxTileRow !== size - 1 || maxTileCol !== 0) {
+        // Distance penalty: further from bottom-left = worse
+        const distance = (size - 1 - maxTileRow) + maxTileCol;
+        cornerPenalty = -maxTile * distance * 2;
+      }
+
+      // Direction preference: prefer down and left (builds toward bottom-left)
+      let directionBonus = 0;
+      if (direction === 'down') {
+        directionBonus = 150; // Strong preference for down
+      } else if (direction === 'left') {
+        directionBonus = 100; // Good preference for left
+      } else if (direction === 'right') {
+        directionBonus = -50; // Slight penalty for right (moves away from corner)
+      } else if (direction === 'up') {
+        directionBonus = -100; // Penalty for up (moves away from corner)
+      }
+
+      // Calculate final score
+      return emptyCount * 20 +           // Empty cells are very valuable
+             mergeCount * 500 +          // Merges are highly valuable
+             cornerValue * 5 +           // Value in corner is good
+             maxTile * 2 +               // Higher max tile is good
+             monotonicBonus +            // Monotonic ordering is good
+             cornerPenalty +             // Penalty for max tile not in corner
+             directionBonus +            // Direction preference
+             gameOverPenalty;            // Heavy penalty for game over
     }
 
     function getBestMove() {
@@ -2604,9 +2878,10 @@
               
               // Schedule next move after a short delay
               if (autodriveActive && !gameOver) {
+                const delay = Math.round(baseAutodriveDelay / autodriveSpeedMultiplier);
                 autodriveTimeout = setTimeout(() => {
                   makeAutodriveMove();
-                }, 300);
+                }, delay);
               }
             } else {
               requestAnimationFrame(checkAndAddTile);
@@ -2614,10 +2889,11 @@
           };
           requestAnimationFrame(checkAndAddTile);
         } else {
-          // Board didn't change, try next move immediately
+          // Board didn't change, try next move with reduced delay
+          const delay = Math.max(50, Math.round(baseAutodriveDelay / autodriveSpeedMultiplier / 3));
           autodriveTimeout = setTimeout(() => {
             makeAutodriveMove();
-          }, 100);
+          }, delay);
         }
       } else {
         // No valid moves, stop autodrive
@@ -2631,12 +2907,16 @@
       if (gameOver) return;
 
       autodriveActive = !autodriveActive;
+      const speedControl = document.getElementById('autodriveSpeedControl');
       
       if (autodriveActive) {
         SoundManager.playLaunch();
         SoundManager.resetAutodriveSequence(); // Reset to start of sequence
         autodriveBtn.classList.add('active');
         autodriveBtn.textContent = 'Stop';
+        // Hide the autodrive button and show speed control
+        if (autodriveBtn) autodriveBtn.style.display = 'none';
+        if (speedControl) speedControl.style.display = 'flex';
         // Wait for launch sound to complete (0.6 seconds) before starting autodrive
         setTimeout(() => {
           if (autodriveActive) {
@@ -2647,10 +2927,108 @@
         SoundManager.playStop();
         autodriveBtn.classList.remove('active');
         autodriveBtn.textContent = 'Autodrive';
+        // Show the autodrive button and hide speed control
+        if (autodriveBtn) autodriveBtn.style.display = 'flex';
+        if (speedControl) speedControl.style.display = 'none';
         if (autodriveTimeout) {
           clearTimeout(autodriveTimeout);
           autodriveTimeout = null;
         }
+      }
+    }
+
+    // Initialize autodrive speed control
+    function initAutodriveSpeed() {
+      // Load saved speed multiplier from localStorage
+      const savedMultiplier = localStorage.getItem('autodriveSpeedMultiplier');
+      if (savedMultiplier) {
+        autodriveSpeedMultiplier = parseFloat(savedMultiplier);
+      } else {
+        // Default to 1x if nothing saved
+        autodriveSpeedMultiplier = 1;
+      }
+
+      const speedSlider = document.getElementById('speedSlider');
+      const speedValue = document.getElementById('speedValue');
+
+      if (speedSlider && speedValue) {
+        speedSlider.value = autodriveSpeedMultiplier;
+        speedValue.textContent = formatSpeedMultiplier(autodriveSpeedMultiplier);
+
+        // Update slider value display
+        speedSlider.addEventListener('input', (e) => {
+          autodriveSpeedMultiplier = parseFloat(e.target.value);
+          speedValue.textContent = formatSpeedMultiplier(autodriveSpeedMultiplier);
+          localStorage.setItem('autodriveSpeedMultiplier', autodriveSpeedMultiplier.toString());
+        });
+
+        // Double-click/double-tap on speed value text to reset to 1x
+        let lastClickTime = 0;
+        speedValue.addEventListener('click', (e) => {
+          const currentTime = Date.now();
+          if (currentTime - lastClickTime < 300) { // 300ms threshold for double-click
+            autodriveSpeedMultiplier = 1;
+            speedSlider.value = 1;
+            speedValue.textContent = '1x';
+            localStorage.setItem('autodriveSpeedMultiplier', '1');
+            e.preventDefault();
+          }
+          lastClickTime = currentTime;
+        });
+
+        // Also handle double-tap on mobile
+        let lastTapTime = 0;
+        speedValue.addEventListener('touchend', (e) => {
+          const currentTime = Date.now();
+          if (currentTime - lastTapTime < 300) { // 300ms threshold for double-tap
+            autodriveSpeedMultiplier = 1;
+            speedSlider.value = 1;
+            speedValue.textContent = '1x';
+            localStorage.setItem('autodriveSpeedMultiplier', '1');
+            e.preventDefault();
+          }
+          lastTapTime = currentTime;
+        });
+
+        // Make speed value look clickable
+        speedValue.style.cursor = 'pointer';
+        speedValue.title = 'Double-click to reset to 1x';
+      }
+
+      // Stop autodrive button handler - force stop regardless of state
+      const stopAutodriveBtn = document.getElementById('stopAutodrive');
+      if (stopAutodriveBtn) {
+        stopAutodriveBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          // Force stop autodrive
+          if (autodriveTimeout) {
+            clearTimeout(autodriveTimeout);
+            autodriveTimeout = null;
+          }
+          autodriveActive = false;
+          SoundManager.playStop();
+          const autodriveBtn = document.getElementById('autodrive');
+          const speedControl = document.getElementById('autodriveSpeedControl');
+          if (autodriveBtn) {
+            autodriveBtn.classList.remove('active');
+            autodriveBtn.textContent = 'Autodrive';
+            autodriveBtn.style.display = 'flex';
+          }
+          if (speedControl) {
+            speedControl.style.display = 'none';
+          }
+        });
+      }
+    }
+
+    // Format speed multiplier for display (e.g., 1.25 -> "1.25x", 1 -> "1x")
+    function formatSpeedMultiplier(multiplier) {
+      // Round to avoid floating point issues
+      const rounded = Math.round(multiplier * 100) / 100;
+      if (rounded % 1 === 0) {
+        return rounded + 'x';
+      } else {
+        return rounded.toFixed(2) + 'x';
       }
     }
 
@@ -2790,6 +3168,9 @@
     function startGame() {
       // Initialize difficulty first
       initDifficulty();
+      
+      // Initialize autodrive speed control
+      initAutodriveSpeed();
       
       if (document.fonts && document.fonts.ready) {
         document.fonts.ready.then(() => {
