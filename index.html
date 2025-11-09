@@ -1383,6 +1383,7 @@
       audioContext: null,
       enabled: true,
       autodriveNoteIndex: 0,
+      hasUserInteracted: false,
       
       // Musical scale for autodrive mode (pentatonic scale in C major)
       // C, D, E, G, A, C (octave)
@@ -1427,11 +1428,17 @@
       // Ensure audio context is resumed (required for mobile browsers)
       async ensureResumed() {
         if (!this.audioContext) return;
+        // Only attempt to resume if user has interacted, otherwise silently return
+        // This prevents console warnings about AudioContext not being allowed to start
         if (this.audioContext.state === 'suspended') {
+          if (!this.hasUserInteracted) {
+            // User hasn't interacted yet, don't try to resume (will be resumed on first interaction)
+            return;
+          }
           try {
             await this.audioContext.resume();
           } catch (e) {
-            console.warn('Failed to resume audio context:', e);
+            // Silently fail - don't log warnings for expected behavior
           }
         }
       },
@@ -1449,8 +1456,18 @@
       async playTone(frequency, duration, type = 'sine', volume = 0.3) {
         if (!this.enabled || !this.audioContext) return;
         
+        // Don't play sounds if context is suspended and user hasn't interacted yet
+        if (this.audioContext.state === 'suspended' && !this.hasUserInteracted) {
+          return;
+        }
+        
         // Resume audio context if suspended (required by browsers)
         await this.ensureResumed();
+        
+        // Double-check state after attempting resume
+        if (this.audioContext.state === 'suspended') {
+          return;
+        }
         
         try {
           const now = this.audioContext.currentTime;
@@ -1471,7 +1488,7 @@
           oscillator.start(now);
           oscillator.stop(now + duration);
         } catch (e) {
-          console.warn('Error playing sound:', e);
+          // Silently fail - don't log warnings for expected behavior
         }
       },
       
@@ -1506,12 +1523,20 @@
       
       async playNewTile() {
         // Subtle pop for new tile
+        // Don't play sounds if user hasn't interacted yet (prevents AudioContext warnings)
+        if (!this.hasUserInteracted) {
+          return;
+        }
         await this.ensureResumed();
         this.playTone(250, 0.1, 'sine', 0.15);
       },
       
       async playInvalidMove() {
         // Low, short error sound for invalid moves
+        // Don't play sounds if user hasn't interacted yet (prevents AudioContext warnings)
+        if (!this.hasUserInteracted) {
+          return;
+        }
         await this.ensureResumed();
         this.playTone(100, 0.15, 'sawtooth', 0.2);
       },
@@ -1531,8 +1556,18 @@
         // Hypercar/spaceship launch sound - accelerating pitch with engine-like quality
         if (!this.enabled || !this.audioContext) return;
         
+        // Don't play sounds if context is suspended and user hasn't interacted yet
+        if (this.audioContext.state === 'suspended' && !this.hasUserInteracted) {
+          return;
+        }
+        
         // Resume audio context if suspended
         await this.ensureResumed();
+        
+        // Double-check state after attempting resume
+        if (this.audioContext.state === 'suspended') {
+          return;
+        }
         
         try {
           const now = this.audioContext.currentTime;
@@ -1584,8 +1619,18 @@
         // Deceleration/shutdown sound - descending pitch
         if (!this.enabled || !this.audioContext) return;
         
+        // Don't play sounds if context is suspended and user hasn't interacted yet
+        if (this.audioContext.state === 'suspended' && !this.hasUserInteracted) {
+          return;
+        }
+        
         // Resume audio context if suspended
         await this.ensureResumed();
+        
+        // Double-check state after attempting resume
+        if (this.audioContext.state === 'suspended') {
+          return;
+        }
         
         try {
           const now = this.audioContext.currentTime;
@@ -1640,6 +1685,7 @@
     function resumeAudioOnInteraction() {
       if (!audioContextResumed && SoundManager.audioContext) {
         audioContextResumed = true;
+        SoundManager.hasUserInteracted = true; // Mark that user has interacted
         SoundManager.ensureResumed().then(() => {
           // Audio context is now active
         }).catch(() => {
@@ -1649,9 +1695,13 @@
     }
     
     // Add listeners for common user interactions
-    document.addEventListener('touchstart', resumeAudioOnInteraction, { once: true, passive: true });
-    document.addEventListener('click', resumeAudioOnInteraction, { once: true });
-    document.addEventListener('keydown', resumeAudioOnInteraction, { once: true });
+    // Use capture phase and make sure we catch all interactions
+    document.addEventListener('touchstart', resumeAudioOnInteraction, { once: true, passive: true, capture: true });
+    document.addEventListener('click', resumeAudioOnInteraction, { once: true, capture: true });
+    document.addEventListener('keydown', resumeAudioOnInteraction, { once: true, capture: true });
+    // Also listen on window for better mobile support
+    window.addEventListener('touchstart', resumeAudioOnInteraction, { once: true, passive: true, capture: true });
+    window.addEventListener('click', resumeAudioOnInteraction, { once: true, capture: true });
 
     function initGame() {
       // Stop any ongoing animations
@@ -1683,10 +1733,18 @@
     }
     
     // Initialize difficulty from localStorage or default
+    // Flag to prevent initGame from being called during initial setup
+    let isInitializing = false;
+    
     function initDifficulty() {
       const savedDifficulty = localStorage.getItem('difficulty') || 'normal';
       if (difficultySettings[savedDifficulty]) {
-        setDifficulty(savedDifficulty);
+        // Set difficulty without initializing game (will be done by startGame)
+        currentDifficulty = savedDifficulty;
+        const settings = difficultySettings[savedDifficulty];
+        size = settings.size;
+        spawn4Chance = settings.spawn4Chance;
+        
         // Update selector
         const difficultySelect = document.getElementById('difficulty');
         if (difficultySelect) {
@@ -1829,8 +1887,10 @@
         autodriveBtn.textContent = 'Autodrive';
       }
       
-      // Restart game with new difficulty
-      initGame();
+      // Restart game with new difficulty (unless we're still initializing)
+      if (!isInitializing) {
+        initGame();
+      }
     }
 
     // Helper function to draw rounded rectangle
@@ -2424,6 +2484,12 @@
     }
 
     document.addEventListener('keydown', e => {
+      // Mark user interaction for audio context
+      if (SoundManager.audioContext && !SoundManager.hasUserInteracted) {
+        SoundManager.hasUserInteracted = true;
+        SoundManager.ensureResumed();
+      }
+      
       if (isAnimating || gameOver || autodriveActive) return; // Prevent moves during animation, when game is over, or when autodrive is active
       
       const oldBoard = JSON.stringify(board);
@@ -2494,6 +2560,12 @@
 
     // Attach touch handlers to document to capture swipes anywhere on screen
     document.addEventListener('touchstart', (e) => {
+      // Mark user interaction for audio context
+      if (SoundManager.audioContext && !SoundManager.hasUserInteracted) {
+        SoundManager.hasUserInteracted = true;
+        SoundManager.ensureResumed();
+      }
+      
       if (isInteractiveElement(e.target)) return;
       if (isAnimating || gameOver || autodriveActive) return;
       e.preventDefault();
@@ -3166,32 +3238,41 @@
 
     // Initialize game after fonts are ready
     function startGame() {
-      // Initialize difficulty first
+      // Set flag to prevent setDifficulty from calling initGame during initialization
+      isInitializing = true;
+      
+      // Initialize difficulty first (without calling initGame)
       initDifficulty();
       
       // Initialize autodrive speed control
       initAutodriveSpeed();
       
+      // Now initialize the game once fonts are ready
+      const doInitGame = () => {
+        isInitializing = false; // Clear flag before initializing
+        initGame();
+      };
+      
       if (document.fonts && document.fonts.ready) {
         document.fonts.ready.then(() => {
           // Fonts are ready, initialize game
-          initGame();
+          doInitGame();
         }).catch(() => {
           // If promise fails, wait a bit and try anyway
           setTimeout(() => {
-            initGame();
+            doInitGame();
           }, 200);
         });
       } else {
         // Fallback for browsers without Font Loading API
         if (document.readyState === 'complete') {
           setTimeout(() => {
-            initGame();
+            doInitGame();
           }, 300);
         } else {
           window.addEventListener('load', () => {
             setTimeout(() => {
-              initGame();
+              doInitGame();
             }, 300);
           });
         }
