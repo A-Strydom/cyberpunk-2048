@@ -16,7 +16,11 @@ A cyberpunk-themed implementation of the classic 2048 puzzle game with stunning 
 - 🤖 **Intelligent Autodrive Mode**: Advanced AI with bottom-left corner strategy and smart decision-making
 - ⚡ **Autodrive Speed Control**: Adjustable speed from 0.5x to 5x with smooth slider control
 - 🎚️ **Difficulty Levels**: Easy (4x4), Normal (5x5), and Hard (6x6) modes with dynamic spawn probabilities
-- 🎲 **Cheat Codes**: Enter "NETRUNNER" to activate cheat mode and double any tile by clicking/tapping it
+- 🎲 **Cheat Codes**: Multiple cheat codes available (NETRUNNER, FLATLINE) with special abilities
+- 🎨 **Material Icons**: Modern Material Design icons throughout the interface for a polished look
+- 🗑️ **Clear High Score**: Reset your high score with a confirmation modal
+- 🎨 **Enhanced Tile Visuals**: Gradient depth effects, border glow, and top highlights for 3D appearance
+- ✨ **Bevel Text Effect**: Numbers on tiles feature a raised bevel effect for depth
 - 📱 **Fully Responsive**: Optimized for desktop, mobile portrait, and landscape orientations
 - 💾 **Local Storage**: High score and preferences persistence (sound, difficulty, autodrive speed)
 - ⚡ **Glitch Effects**: Cyberpunk-style visual effects on interactions
@@ -31,14 +35,17 @@ A cyberpunk-themed implementation of the classic 2048 puzzle game with stunning 
 3. Try to create a tile with the number **2048**!
 4. Click **REBOOT** to restart the game (reloads page to fetch latest version)
 5. Click **Autodrive** to watch the AI play automatically
-6. Open the **menu** (☰) to access:
-   - **Sound toggle**: Enable/disable sounds
+6. **Sound toggle** (♪ icon): Click the sound icon next to the menu to enable/disable sounds
+7. Open the **menu** (☰) to access:
+   - **Clear High Score**: Reset your high score (with confirmation)
    - **Difficulty**: Select Easy (4x4), Normal (5x5), or Hard (6x6) from the modal
-   - **Cheat**: Enter "NETRUNNER" to activate cheat mode
+   - **Cheat**: Enter cheat codes to activate special abilities
    - **Help**: View game instructions
-7. Control **Autodrive speed** with the slider (0.5x - 5x) when Autodrive is active
-8. Double-click/tap the speed value (e.g., "1x") to reset to normal speed
-9. Click/tap anywhere outside the menu to close it
+8. Control **Autodrive speed** with the slider (0.5x - 5x) when Autodrive is active
+9. Double-click/tap the speed value (e.g., "1x") to reset to normal speed
+10. Press **Escape** key to close any open modal
+11. Click/tap anywhere outside modals to close them
+12. The game automatically redraws tiles when the window is resized
 
 ## 🚀 Getting Started
 
@@ -86,14 +93,19 @@ Difficulty can be changed from the menu, and your preference is saved to localSt
 
 ## 🎲 Cheat Codes
 
-Activate special abilities by entering cheat codes:
+Activate special abilities by entering cheat codes in the cheat menu:
 
-- **NETRUNNER**: Enter this code (case-insensitive) in the cheat menu to activate cheat mode
+- **NETRUNNER**: Enter this code (case-insensitive) to activate cheat mode
   - Once activated, click or tap any tile to double its value
   - Perfect for testing strategies or reaching higher scores
   - Cheat mode resets when you restart the game
 
-Access the cheat menu from the main menu (☰) → **↯ CHEAT**.
+- **FLATLINE**: Enter this code to activate the flatline cheat
+  - A red "FLATLINE" button will appear in the cheat menu
+  - Click the button to immediately end the game (trigger game over)
+  - Useful for testing the game over screen or ending a game quickly
+
+Access the cheat menu from the main menu (☰) → **⌨️ CHEAT**.
 
 ## 🤖 Autodrive Mode
 
@@ -138,8 +150,12 @@ The game uses CSS custom properties and can be easily customized by modifying th
 - **iOS Meta Tags**: Apple touch icon and web app capabilities for home screen installation
 - **PNG Icon Support**: Multiple icon sizes (180x180, 152x152, 120x120, 76x76) for optimal iOS display
 - **Google Fonts**: Share Tech Mono and Sixtyfour fonts
+- **Material Icons**: Google Material Icons for modern UI elements
 - **AI Algorithm**: Heuristic-based evaluation function with weighted scoring and snake pattern strategy
 - **Dynamic Font Scaling**: Large numbers (6+ digits) automatically scale to fit within tiles
+- **Canvas Resize Handling**: Automatic tile redraw on window resize and orientation change
+- **Modal System**: Custom-styled modals with backdrop blur and smooth animations
+- **Confirmation Dialogs**: Custom confirmation modals matching the cyberpunk theme
 
 ## 📝 License
 
@@ -148,7 +164,7 @@ This project is open source and available under the [MIT License](LICENSE).
 ## 🙏 Acknowledgments
 
 - Based on the original [2048 game](https://github.com/gabrielecirulli/2048) by Gabriele Cirulli
-- Cyberpunk aesthetic inspired by classic sci-fi themes
+- Cyberpunk aesthetic inspired by [Cyberpunk 2077](https://www.cyberpunk.net/) and classic sci-fi themes
 - Fonts: [Share Tech Mono](https://fonts.google.com/specimen/Share+Tech+Mono) and [Sixtyfour](https://fonts.google.com/specimen/Sixtyfour)
 
 ## 📁 Project Structure
@@ -165,11 +181,25 @@ cyberpunk-2048/
 
 ## 🎯 Future Enhancements
 
-- [ ] Theme variations
-- [ ] Leaderboard system
-- [ ] Additional sound effect options
-- [ ] Custom color schemes
-- [ ] More cheat codes
+- [ ] **Undo/Redo System**: Allow players to undo moves and experiment with different strategies
+- [ ] **Achievement System**: Unlock achievements for milestones (reach 512, 1024, 2048, etc.)
+- [ ] **Statistics Tracking**: Track total games played, best streak, average score, and move count
+- [ ] **Replay System**: Save and replay your best games move-by-move
+- [ ] **Multiplayer Mode**: Compete with friends in real-time or turn-based matches
+- [ ] **Daily Challenges**: Unique daily puzzles with special objectives or constraints
+- [ ] **Time Attack Mode**: Race against the clock to reach 2048 as fast as possible
+- [ ] **Power-up System**: Temporary boosts like "Freeze" (skip next spawn) or "Shuffle" (rearrange tiles)
+- [ ] **Custom Board Sizes**: Allow players to create custom grid sizes (3x3 to 8x8)
+- [ ] **Tile Skins**: Unlockable visual themes for tiles (matrix, neon, holographic, etc.)
+- [ ] **Sound Theme Packs**: Different sound sets (synthwave, chiptune, ambient, etc.)
+- [ ] **Background Themes**: Multiple cyberpunk environment backgrounds (cityscape, space, data stream)
+- [ ] **Gesture Shortcuts**: Custom swipe patterns for quick actions (double-swipe for undo, etc.)
+- [ ] **Export/Import Saves**: Share game states or high scores with friends via codes
+- [ ] **AI Difficulty Levels**: Different AI personalities for autodrive (aggressive, conservative, random)
+- [ ] **Particle Customization**: Adjustable merge particle effects and colors
+- [ ] **Accessibility Features**: High contrast mode, reduced motion, and screen reader support
+- [ ] **Offline PWA**: Full Progressive Web App with offline support and install prompts
+- [ ] **Global Leaderboard**: Online leaderboard with authentication and social features
 
 ---
 

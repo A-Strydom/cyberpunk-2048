@@ -474,10 +474,14 @@
       font-weight: bold;
       color: #ff0040;
       text-shadow: 
-        0 0 8px #ff0040,
-        0 0 15px #ff0040;
+        0 0 4px rgba(255, 0, 64, 0.8),
+        0 0 10px rgba(255, 0, 64, 0.48),
+        0 0 18px rgba(255, 0, 64, 0.32),
+        0 0 28px rgba(255, 0, 64, 0.24),
+        0 0 40px rgba(255, 0, 64, 0.16);
       margin-bottom: 20px;
       letter-spacing: 8px;
+      filter: brightness(1.1);
     }
     .game-over-subtitle {
       font-size: 24px;
@@ -486,14 +490,14 @@
       margin-bottom: 30px;
     }
     .final-score {
-      font-size: 32px;
+      font-size: 42px;
       color: #00f5ff;
       text-shadow: 0 0 15px #00f5ff;
       margin-bottom: 40px;
     }
     .final-score span {
       display: block;
-      font-size: 18px;
+      font-size: 36px;
       color: #00f5ff;
       margin-top: 10px;
     }
@@ -512,11 +516,11 @@
     }
     #restartGame:hover {
       background: rgba(0, 245, 255, 0.1);
-      color: #f0f;
-      border-color: #f0f;
-      box-shadow: 0 0 25px #f0f;
+      color: #ffeb3b;
+      border-color: #ffeb3b;
+      box-shadow: 0 0 25px #ffeb3b;
       transform: scale(1.1);
-      text-shadow: 0 0 15px #f0f;
+      text-shadow: 0 0 15px #ffeb3b;
     }
     #autodrive {
       background: rgba(10, 10, 30, 0.9);
@@ -912,6 +916,39 @@
       color: rgba(0, 245, 255, 0.7);
       font-style: italic;
     }
+    .flatline-btn {
+      margin-top: 20px;
+      background: rgba(255, 0, 64, 0.1);
+      border: 2px solid #ff0040;
+      color: #ff0040;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 16px;
+      padding: 12px 24px;
+      cursor: pointer;
+      text-shadow: 0 0 8px #ff0040;
+      box-shadow: 0 0 15px rgba(255, 0, 64, 0.5);
+      transition: all 0.3s ease;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+    }
+    .flatline-btn:hover {
+      background: rgba(255, 0, 64, 0.2);
+      box-shadow: 0 0 25px rgba(255, 0, 64, 0.8);
+      text-shadow: 0 0 12px #ff0040;
+      transform: scale(1.05);
+    }
+    .flatline-btn .material-icons {
+      font-family: 'Material Icons';
+      font-size: 20px;
+      color: inherit;
+      line-height: 1;
+    }
     .confirm-buttons {
       display: flex;
       flex-direction: column;
@@ -1304,6 +1341,12 @@
 
       .flatlined-text {
         font-size: 48px;
+        text-shadow: 
+          0 0 3px rgba(255, 0, 64, 0.8),
+          0 0 7px rgba(255, 0, 64, 0.48),
+          0 0 12px rgba(255, 0, 64, 0.32),
+          0 0 20px rgba(255, 0, 64, 0.24),
+          0 0 28px rgba(255, 0, 64, 0.16);
       }
 
       .game-over-subtitle {
@@ -1505,6 +1548,9 @@
       <input type="text" id="cheatInput" placeholder="Type cheat code here..." autocomplete="off" />
       <div id="cheatStatus" class="cheat-status"></div>
       <p class="cheat-hint" id="cheatHint" style="display: none;">New cyberware installed: You can now click or tap any tile to double its value.</p>
+      <button id="flatlineBtn" class="flatline-btn" style="display: none;" title="Trigger Flatline">
+        <span class="material-icons">sentiment_very_dissatisfied</span> FLATLINE
+      </button>
     </div>
   </div>
   <div id="helpModal">
@@ -2012,6 +2058,13 @@
       
       // Reset cheat when game restarts
       cheatActive = false;
+      flatlineActive = false;
+      if (flatlineBtn) flatlineBtn.style.display = 'none';
+      if (cheatStatus) {
+        cheatStatus.textContent = '';
+        cheatStatus.className = 'cheat-status';
+      }
+      if (cheatHint) cheatHint.style.display = 'none';
       
       // Initialize board first
       board = Array.from({ length: size }, () => Array(size).fill(0));
@@ -3523,6 +3576,14 @@
       autodriveBtn.classList.remove('active');
       updateAutodriveButtonText('Autodrive');
       
+      // Clear cheat input and status
+      if (cheatInput) cheatInput.value = '';
+      if (cheatStatus) {
+        cheatStatus.textContent = '';
+        cheatStatus.className = 'cheat-status';
+      }
+      if (flatlineBtn) flatlineBtn.style.display = 'none';
+      
       // Reload the page to get latest version (high scores persist in localStorage)
       // Delay slightly to let animations play
       setTimeout(() => {
@@ -3537,6 +3598,13 @@
       }
       autodriveBtn.classList.remove('active');
       updateAutodriveButtonText('Autodrive');
+      // Clear cheat input and status
+      if (cheatInput) cheatInput.value = '';
+      if (cheatStatus) {
+        cheatStatus.textContent = '';
+        cheatStatus.className = 'cheat-status';
+      }
+      if (flatlineBtn) flatlineBtn.style.display = 'none';
       initGame();
     });
     autodriveBtn.addEventListener('click', toggleAutodrive);
@@ -3675,11 +3743,13 @@
 
     // Cheat functionality
     let cheatActive = false;
+    let flatlineActive = false;
     const cheatBtn = document.getElementById('cheatBtn');
     const cheatModal = document.getElementById('cheatModal');
     const cheatInput = document.getElementById('cheatInput');
     const cheatStatus = document.getElementById('cheatStatus');
     const closeCheat = document.getElementById('closeCheat');
+    const flatlineBtn = document.getElementById('flatlineBtn');
 
     if (cheatBtn) {
       cheatBtn.addEventListener('click', () => {
@@ -3715,19 +3785,35 @@
         const code = e.target.value.trim().toLowerCase();
         if (code === 'netrunner') {
           cheatActive = true;
+          flatlineActive = false;
           cheatStatus.textContent = '✓ CHEAT ACTIVATED';
           cheatStatus.className = 'cheat-status active';
           if (cheatHint) cheatHint.style.display = 'block';
+          if (flatlineBtn) flatlineBtn.style.display = 'none';
+        } else if (code === 'flatline') {
+          // Activate flatline cheat
+          cheatActive = false;
+          flatlineActive = true;
+          cheatStatus.textContent = '⚡ FLATLINE ACTIVATED';
+          cheatStatus.className = 'cheat-status active';
+          if (cheatHint) cheatHint.style.display = 'none';
+          if (flatlineBtn) flatlineBtn.style.display = 'flex';
+          // Clear cheat input
+          if (cheatInput) cheatInput.value = '';
         } else if (code.length > 0) {
           cheatActive = false;
+          flatlineActive = false;
           cheatStatus.textContent = '✗ INVALID CODE';
           cheatStatus.className = 'cheat-status invalid';
           if (cheatHint) cheatHint.style.display = 'none';
+          if (flatlineBtn) flatlineBtn.style.display = 'none';
         } else {
           cheatActive = false;
+          flatlineActive = false;
           cheatStatus.textContent = '';
           cheatStatus.className = 'cheat-status';
           if (cheatHint) cheatHint.style.display = 'none';
+          if (flatlineBtn) flatlineBtn.style.display = 'none';
         }
       });
 
@@ -3737,13 +3823,35 @@
           const code = e.target.value.trim().toLowerCase();
           if (code === 'netrunner') {
             cheatActive = true;
+            flatlineActive = false;
             cheatStatus.textContent = '✓ CHEAT ACTIVATED';
             cheatStatus.className = 'cheat-status active';
             if (cheatHint) cheatHint.style.display = 'block';
+            if (flatlineBtn) flatlineBtn.style.display = 'none';
+          } else if (code === 'flatline') {
+            // Activate flatline cheat
+            cheatActive = false;
+            flatlineActive = true;
+            cheatStatus.textContent = '⚡ FLATLINE ACTIVATED';
+            cheatStatus.className = 'cheat-status active';
+            if (cheatHint) cheatHint.style.display = 'none';
+            if (flatlineBtn) flatlineBtn.style.display = 'flex';
+            // Clear cheat input
+            if (cheatInput) cheatInput.value = '';
           }
         } else if (e.key === 'Escape') {
           cheatModal.classList.remove('show');
           // Don't reset cheatActive - keep it active so user can click tiles
+        }
+      });
+    }
+
+    // Flatline button click handler
+    if (flatlineBtn) {
+      flatlineBtn.addEventListener('click', () => {
+        if (!gameOver && flatlineActive) {
+          showGameOver();
+          if (cheatModal) cheatModal.classList.remove('show');
         }
       });
     }
