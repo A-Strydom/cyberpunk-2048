@@ -3338,12 +3338,18 @@
         menuDropdown.classList.toggle('show');
       });
       
-      // Close menu when clicking outside
-      document.addEventListener('click', (e) => {
-        if (!menuToggle.contains(e.target) && !menuDropdown.contains(e.target)) {
-          menuDropdown.classList.remove('show');
+      // Close menu when clicking/tapping outside
+      const closeMenuIfOutside = (e) => {
+        const target = e.target;
+        if (menuDropdown.classList.contains('show')) {
+          if (!menuToggle.contains(target) && !menuDropdown.contains(target)) {
+            menuDropdown.classList.remove('show');
+          }
         }
-      });
+      };
+      
+      document.addEventListener('click', closeMenuIfOutside);
+      document.addEventListener('touchend', closeMenuIfOutside);
     }
 
     // Sound button functionality
